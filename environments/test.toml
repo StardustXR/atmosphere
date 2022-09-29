@@ -1,0 +1,5 @@
+root = [0.0, 0.0, 0.0]
+sky = "grid_sky.hdr"
+
+[models.steamvr]
+path = "steamvr.glb"
