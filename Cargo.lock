@@ -743,6 +743,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_repr"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fe39d9fbb0ebf5eb2c7cb7e2a47e4f462fad1379f1166b8ae49ad9eae89a7ca"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -787,9 +798,9 @@ dependencies = [
 
 [[package]]
 name = "stardust-xr"
-version = "0.3.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2170ee26edf0a71e8baebe600cd08614fee4d84c2c183d541fad3e14a8f14e49"
+checksum = "f95b6f8581f109f06f39a2c742385b3af7777e1f9c85547e1e8efefaaa767a74"
 dependencies = [
  "anyhow",
  "chrono",
@@ -799,6 +810,7 @@ dependencies = [
  "flexbuffers",
  "mint",
  "parking_lot",
+ "serde",
  "slotmap",
  "stardust-xr-schemas",
  "thiserror",
@@ -823,9 +835,9 @@ dependencies = [
 
 [[package]]
 name = "stardust-xr-fusion"
-version = "0.14.0"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53c12c6bca2cccddc6cd2a67b62fe93ce5061479d1f08136d4029c9016b327a2"
+checksum = "f714c4162900ed1370f909f0c7fb6f31afb2b70f650f451614071d0a44fa0269"
 dependencies = [
  "anyhow",
  "buildstructor",
@@ -841,12 +853,12 @@ dependencies = [
  "mint",
  "nanoid",
  "once_cell",
- "ouroboros",
  "parking_lot",
  "rustc-hash",
+ "serde",
+ "serde_repr",
  "slotmap",
  "stardust-xr",
- "stardust-xr-schemas",
  "thiserror",
  "tokio",
  "uds",
@@ -856,12 +868,18 @@ dependencies = [
 
 [[package]]
 name = "stardust-xr-schemas"
-version = "0.1.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5c88c0ea1c307c0e93d799abb94c1db13a211b41101a4f7d648dd215fe8158"
+checksum = "bc773f88f1d0a6b2ad26540fb87d791acb3374773be40a9078ef45fb10e7f259"
 dependencies = [
+ "anyhow",
  "flatbuffers",
+ "flexbuffers",
+ "glam",
  "mint",
+ "ouroboros",
+ "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -887,18 +905,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.35"
+version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c53f98874615aea268107765aa1ed8f6116782501d18e53d08b471733bea6c85"
+checksum = "10deb33631e3c9018b9baf9dcbbc4f737320d2b576bac10f6aefa048fa407e3e"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.35"
+version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8b463991b4eab2d801e724172285ec4195c650e8ec79b149e6c2a8e6dd3f783"
+checksum = "982d17546b47146b28f7c22e3d08465f6b8903d0ea13c1660d9d84a6e7adcdbb"
 dependencies = [
  "proc-macro2",
  "quote",

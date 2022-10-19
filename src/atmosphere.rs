@@ -21,6 +21,7 @@ impl Default for Config {
 	}
 }
 
+#[allow(dead_code)]
 pub struct Atmosphere {
 	config: Config,
 	environment: Option<Environment>,
