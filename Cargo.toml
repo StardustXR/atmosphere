@@ -15,7 +15,7 @@ path = "src/main.rs"
 tokio = { version = "1.21.1", features = ["full"] }
 glam = { version = "0.21.3", features = ["mint"] }
 mint = { version = "0.5.9", features = ["serde"] }
-stardust-xr-fusion = "0.17.0"
+stardust-xr-fusion = "0.17.4"
 confy = "0.5.0"
 serde = { version = "1.0.145", features = ["derive"] }
 toml = { version = "0.5.9", features = ["preserve_order"] }
