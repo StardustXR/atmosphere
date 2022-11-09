@@ -28,11 +28,23 @@ impl Rotation {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ModelData {
-	pub path: PathBuf,
+pub struct SpatialData {
 	pub parent: Option<String>,
 	pub position: Option<Vector3<f32>>,
 	pub rotation: Option<Rotation>,
+	pub scale: Option<Vector3<f32>>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ModelData {
+	pub path: PathBuf,
+	pub spatial: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct BoxFieldData {
+	pub spatial: String,
+	pub size: Vector3<f32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -41,7 +53,9 @@ pub struct EnvironmentData {
 	pub sky_tex: Option<PathBuf>,
 	pub sky_light: Option<PathBuf>,
 	pub root: Vector3<f32>,
+	pub spatials: FxHashMap<String, SpatialData>,
 	pub models: FxHashMap<String, ModelData>,
+	pub box_fields: FxHashMap<String, BoxFieldData>,
 }
 impl EnvironmentData {
 	pub fn load(file: impl AsRef<Path>) -> Result<Self> {

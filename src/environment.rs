@@ -11,6 +11,7 @@ use std::{fmt::Debug, path::PathBuf};
 pub struct Environment {
 	data: EnvironmentData,
 	root: Spatial,
+	spatials: FxHashMap<String, Spatial>,
 	models: FxHashMap<String, Model>,
 }
 impl Environment {
@@ -22,7 +23,7 @@ impl Environment {
 		let root = Spatial::builder()
 			.position(data.root)
 			.spatial_parent(parent)
-			.zoneable(false)
+			.zoneable(true)
 			.build()?;
 		let client = parent.client().unwrap();
 		let config_folder = config_path.parent().unwrap();
@@ -37,6 +38,33 @@ impl Environment {
 				.set_sky_light(&config_folder.join(sky_light))
 				.unwrap();
 		}
+		let spatials: Result<FxHashMap<String, Spatial>, NodeError> = data
+			.spatials
+			.iter()
+			.map(|(name, data)| {
+				let spatial = Spatial::builder()
+					.spatial_parent(&root)
+					.and_position(data.position)
+					.and_rotation(data.rotation.as_ref().map(Rotation::to_quat))
+					.and_scale(data.scale)
+					.zoneable(false)
+					.build();
+
+				Ok((name.clone(), spatial?))
+			})
+			.collect();
+		let spatials = spatials?;
+		for (name, spatial) in spatials.iter() {
+			if let Some(data) = data.spatials.get(name) {
+				if let Some(parent) = data
+					.parent
+					.as_ref()
+					.and_then(|parent_name| spatials.get(parent_name))
+				{
+					spatial.set_spatial_parent(parent).unwrap();
+				}
+			}
+		}
 		let models: Result<FxHashMap<String, Model>, NodeError> = data
 			.models
 			.iter()
@@ -44,24 +72,25 @@ impl Environment {
 				let path = config_folder.join(&data.path);
 				let model = Model::builder()
 					.resource(&path)
-					.spatial_parent(&root)
-					.and_position(data.position)
-					.and_rotation(data.rotation.as_ref().map(Rotation::to_quat))
+					.spatial_parent(
+						data.spatial
+							.as_ref()
+							.and_then(|spatial| spatials.get(spatial))
+							.unwrap_or(&root),
+					)
 					.build();
 
 				Ok((name.clone(), model?))
 			})
 			.collect();
 		let models = models?;
-		for (name, model) in models.iter() {
-			if let Some(data) = data.models.get(name) {
-				if let Some(parent) = data.parent.as_ref().and_then(|parent| models.get(parent)) {
-					model.set_spatial_parent(parent).unwrap();
-				}
-			}
-		}
 
-		Ok(Environment { data, root, models })
+		Ok(Environment {
+			data,
+			root,
+			spatials,
+			models,
+		})
 	}
 }
 impl Debug for Environment {
@@ -69,6 +98,7 @@ impl Debug for Environment {
 		f.debug_struct("Environment")
 			.field("data", &self.data)
 			.field("root", &self.root.node().get_path())
+			.field("spatials", &self.spatials.keys())
 			.field("models", &self.models.keys())
 			.finish()
 	}
