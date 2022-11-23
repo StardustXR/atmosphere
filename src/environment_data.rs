@@ -8,7 +8,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(untagged)]
 pub enum Rotation {
 	Yaw(f32),
@@ -26,36 +26,50 @@ impl Rotation {
 		}
 	}
 }
+#[derive(Debug, Deserialize, Clone, Copy)]
+#[serde(untagged)]
+pub enum Scale {
+	Uniform(f32),
+	Vector(Vector3<f32>),
+}
+impl Scale {
+	pub fn to_vec(&self) -> Vector3<f32> {
+		match self {
+			Scale::Uniform(scale) => Vector3::from([*scale; 3]),
+			Scale::Vector(scale) => *scale,
+		}
+	}
+}
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct SpatialData {
 	pub parent: Option<String>,
 	pub position: Option<Vector3<f32>>,
 	pub rotation: Option<Rotation>,
-	pub scale: Option<Vector3<f32>>,
+	pub scale: Option<Scale>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct ModelData {
 	pub path: PathBuf,
 	pub spatial: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct BoxFieldData {
 	pub spatial: String,
 	pub size: Vector3<f32>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EnvironmentData {
 	pub sky: Option<PathBuf>,
 	pub sky_tex: Option<PathBuf>,
 	pub sky_light: Option<PathBuf>,
 	pub root: Vector3<f32>,
-	pub spatials: FxHashMap<String, SpatialData>,
-	pub models: FxHashMap<String, ModelData>,
-	pub box_fields: FxHashMap<String, BoxFieldData>,
+	pub spatials: Option<FxHashMap<String, SpatialData>>,
+	pub models: Option<FxHashMap<String, ModelData>>,
+	pub box_fields: Option<FxHashMap<String, BoxFieldData>>,
 }
 impl EnvironmentData {
 	pub fn load(file: impl AsRef<Path>) -> Result<Self> {

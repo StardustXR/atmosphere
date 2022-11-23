@@ -1,4 +1,4 @@
-use crate::environment_data::{EnvironmentData, Rotation};
+use crate::environment_data::{EnvironmentData, Rotation, Scale};
 use anyhow::Result;
 use rustc_hash::FxHashMap;
 use stardust_xr_fusion::{
@@ -38,15 +38,15 @@ impl Environment {
 				.set_sky_light(&config_folder.join(sky_light))
 				.unwrap();
 		}
-		let spatials: Result<FxHashMap<String, Spatial>, NodeError> = data
-			.spatials
+		let spatials_data = data.spatials.clone().unwrap_or_default();
+		let spatials: Result<FxHashMap<String, Spatial>, NodeError> = spatials_data
 			.iter()
 			.map(|(name, data)| {
 				let spatial = Spatial::builder()
 					.spatial_parent(&root)
 					.and_position(data.position)
 					.and_rotation(data.rotation.as_ref().map(Rotation::to_quat))
-					.and_scale(data.scale)
+					.and_scale(data.scale.as_ref().map(Scale::to_vec))
 					.zoneable(false)
 					.build();
 
@@ -55,8 +55,8 @@ impl Environment {
 			.collect();
 		let spatials = spatials?;
 		for (name, spatial) in spatials.iter() {
-			if let Some(data) = data.spatials.get(name) {
-				if let Some(parent) = data
+			if let Some(spatial_data) = spatials_data.get(name) {
+				if let Some(parent) = spatial_data
 					.parent
 					.as_ref()
 					.and_then(|parent_name| spatials.get(parent_name))
@@ -65,8 +65,8 @@ impl Environment {
 				}
 			}
 		}
-		let models: Result<FxHashMap<String, Model>, NodeError> = data
-			.models
+		let models_data = data.models.clone().unwrap_or_default();
+		let models: Result<FxHashMap<String, Model>, NodeError> = models_data
 			.iter()
 			.map(|(name, data)| {
 				let path = config_folder.join(&data.path);

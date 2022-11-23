@@ -1,5 +1,7 @@
 root = [0.0, 0.0, 0.0]
 sky = "grid_sky.hdr"
 
+[spatials]
 [models.steamvr]
 path = "steamvr.glb"
+[box_fields]
