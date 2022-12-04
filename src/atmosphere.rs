@@ -30,7 +30,11 @@ pub struct Atmosphere {
 impl Atmosphere {
 	pub fn new(client: &Arc<Client>) -> Self {
 		let config: Config = dbg!(confy::load("atmosphere", "atmosphere").unwrap());
-		let data_path = config.environment.clone();
+		let data_path = dirs::config_dir()
+			.unwrap()
+			.join("atmosphere/environments")
+			.join(&config.environment)
+			.join("env.toml");
 		let root = Spatial::builder()
 			.spatial_parent(client.get_root())
 			.zoneable(false)
@@ -40,7 +44,7 @@ impl Atmosphere {
 			.unwrap();
 		root.set_position(None, Vector3::from([0.0, -config.height, 0.0]))
 			.unwrap();
-		let environment_data = EnvironmentData::load(&config.environment).unwrap();
+		let environment_data = EnvironmentData::load(&data_path).unwrap();
 		let environment = Some(Environment::from_data(&root, data_path, environment_data).unwrap());
 		dbg!(&environment);
 		Atmosphere {

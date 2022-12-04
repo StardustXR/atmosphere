@@ -789,6 +789,7 @@ version = "0.3.0"
 dependencies = [
  "anyhow",
  "confy",
+ "dirs",
  "glam 0.22.0",
  "mint",
  "rustc-hash",
