@@ -16,7 +16,7 @@ async fn main() {
 	let _root = client.wrap_root(Atmosphere::new(&client));
 
 	tokio::select! {
-		e = event_loop => e.unwrap(),
 		e = tokio::signal::ctrl_c() => e.unwrap(),
+		e = event_loop => e.unwrap().unwrap(),
 	}
 }
