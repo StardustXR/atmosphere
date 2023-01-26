@@ -1,4 +1,4 @@
-use anyhow::Result;
+use color_eyre::eyre::Result;
 use glam::{EulerRot, Quat};
 use mint::{Quaternion, Vector3};
 use rustc_hash::FxHashMap;

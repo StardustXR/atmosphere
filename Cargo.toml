@@ -1,6 +1,6 @@
 [package]
 name = "stardust-xr-atmosphere"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "Stardust XR's reference environment/homespace client"
 authors = ["Nova King <technobaboo@proton.me>"]
@@ -12,13 +12,13 @@ name = "atmosphere"
 path = "src/main.rs"
 
 [dependencies]
-tokio = { version = "1.21.2", features = ["full"] }
+tokio = { version = "1.24.2", features = ["full"] }
 glam = { version = "0.22.0", features = ["mint"] }
 mint = { version = "0.5.9", features = ["serde"] }
-stardust-xr-fusion = "0.25.5"
-confy = "0.5.0"
-serde = { version = "1.0.145", features = ["derive"] }
-toml = { version = "0.5.9", features = ["preserve_order"] }
-anyhow = "1.0.65"
+stardust-xr-fusion = "0.34.0"
+confy = "0.5.1"
+serde = { version = "1.0.152", features = ["derive"] }
+toml = { version = "0.6.0", features = ["preserve_order"] }
 rustc-hash = "1.1.0"
 dirs = "4.0.0"
+color-eyre = "0.6.2"

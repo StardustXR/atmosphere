@@ -1,8 +1,9 @@
 use crate::environment_data::{EnvironmentData, Rotation, Scale};
-use anyhow::Result;
+use color_eyre::eyre::Result;
 use rustc_hash::FxHashMap;
 use stardust_xr_fusion::{
-	drawable::Model,
+	core::values::Transform,
+	drawable::{set_sky_light, set_sky_tex, set_sky_tex_light, Model, ResourceID},
 	node::{NodeError, NodeType},
 	spatial::Spatial,
 };
@@ -20,37 +21,33 @@ impl Environment {
 		config_path: PathBuf,
 		data: EnvironmentData,
 	) -> Result<Self> {
-		let root = Spatial::builder()
-			.position(data.root)
-			.spatial_parent(parent)
-			.zoneable(true)
-			.build()?;
+		let root = Spatial::create(parent, Transform::from_position(data.root), true)?;
 		let client = parent.client().unwrap();
 		let config_folder = config_path.parent().unwrap();
 		if let Some(sky) = &data.sky {
-			client.set_sky_tex_light(&config_folder.join(sky)).unwrap();
+			set_sky_tex_light(&client, &config_folder.join(sky))?;
 		}
 		if let Some(sky_tex) = &data.sky_tex {
-			client.set_sky_tex(&config_folder.join(sky_tex)).unwrap();
+			set_sky_tex(&client, &config_folder.join(sky_tex))?;
 		}
 		if let Some(sky_light) = &data.sky_light {
-			client
-				.set_sky_light(&config_folder.join(sky_light))
-				.unwrap();
+			set_sky_light(&client, &config_folder.join(sky_light))?;
 		}
 		let spatials_data = data.spatials.clone().unwrap_or_default();
 		let spatials: Result<FxHashMap<String, Spatial>, NodeError> = spatials_data
 			.iter()
 			.map(|(name, data)| {
-				let spatial = Spatial::builder()
-					.spatial_parent(&root)
-					.and_position(data.position)
-					.and_rotation(data.rotation.as_ref().map(Rotation::to_quat))
-					.and_scale(data.scale.as_ref().map(Scale::to_vec))
-					.zoneable(false)
-					.build();
+				let spatial = Spatial::create(
+					&root,
+					Transform {
+						position: data.position,
+						rotation: data.rotation.as_ref().map(Rotation::to_quat),
+						scale: data.scale.as_ref().map(Scale::to_vec),
+					},
+					false,
+				)?;
 
-				Ok((name.clone(), spatial?))
+				Ok((name.clone(), spatial))
 			})
 			.collect();
 		let spatials = spatials?;
@@ -70,17 +67,14 @@ impl Environment {
 			.iter()
 			.map(|(name, data)| {
 				let path = config_folder.join(&data.path);
-				let model = Model::builder()
-					.resource(&path)
-					.spatial_parent(
-						data.spatial
-							.as_ref()
-							.and_then(|spatial| spatials.get(spatial))
-							.unwrap_or(&root),
-					)
-					.build();
+				let parent = data
+					.spatial
+					.as_ref()
+					.and_then(|spatial| spatials.get(spatial))
+					.unwrap_or(&root);
+				let model = Model::create(parent, Transform::default(), &ResourceID::Direct(path))?;
 
-				Ok((name.clone(), model?))
+				Ok((name.clone(), model))
 			})
 			.collect();
 		let models = models?;
