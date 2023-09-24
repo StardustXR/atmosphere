@@ -461,6 +461,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
+name = "lerp"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecc56a024593ecbcacb6bb4f8f4ace719eb08ae9b701535640ef3efb0e706260"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.148"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -486,6 +495,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.37",
+]
+
+[[package]]
+name = "map-range"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bffa558d7f51b549670be5ff6db164cd9be428c035cbf4e3f782db3da66845a5"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -966,6 +984,7 @@ dependencies = [
  "rustc-hash",
  "serde",
  "stardust-xr-fusion",
+ "stardust-xr-molecules",
  "tokio",
  "toml 0.8.0",
 ]
@@ -990,6 +1009,26 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "stardust-xr-molecules"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09fbc33806e9377f2c5faa07dc88f0e4bf220ff14a4bacd1eafc27bf69ac0bbd"
+dependencies = [
+ "color-rs",
+ "glam",
+ "lazy_static",
+ "lerp",
+ "map-range",
+ "mint",
+ "rustc-hash",
+ "serde",
+ "stardust-xr-fusion",
+ "tokio",
+ "tracing",
+ "xkbcommon",
 ]
 
 [[package]]
@@ -1402,3 +1441,19 @@ checksum = "7c2e3184b9c4e92ad5167ca73039d0c42476302ab603e2fec4487511f38ccefc"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "xkbcommon"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c286371c44b3572d19b09196c129a8fff47d7704d6494daefb44fec10f0278ab"
+dependencies = [
+ "libc",
+ "xkeysym",
+]
+
+[[package]]
+name = "xkeysym"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "054a8e68b76250b253f671d1268cb7f1ae089ec35e195b2efb2a4e9a836d0621"

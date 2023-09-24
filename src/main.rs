@@ -2,6 +2,7 @@ mod atmosphere;
 mod config;
 mod environment;
 mod environment_data;
+mod play_space;
 
 use crate::config::Config;
 use atmosphere::Atmosphere;
@@ -36,7 +37,7 @@ fn main() {
 #[tokio::main(flavor = "current_thread")]
 async fn show(config: &Config, env_name: Option<String>) {
 	let (client, event_loop) = Client::connect_with_async_loop().await.unwrap();
-	let _atmosphere = Atmosphere::new(&client, &config, env_name);
+	let _atmosphere = client.wrap_root(Atmosphere::new(&client, &config, env_name));
 
 	tokio::select! {
 		e = tokio::signal::ctrl_c() => e.unwrap(),
