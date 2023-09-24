@@ -1,48 +1,33 @@
-use crate::{environment::Environment, environment_data::EnvironmentData};
-use color_eyre::eyre::Result;
+use crate::{environment::Environment, environment_data::EnvironmentData, Config};
 use mint::Vector3;
-use serde::{Deserialize, Serialize};
 use stardust_xr_fusion::{client::Client, core::values::Transform, spatial::Spatial};
-use std::{path::PathBuf, sync::Arc};
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
-	height: f32,
-	environment: PathBuf,
-}
-impl Default for Config {
-	fn default() -> Self {
-		Self {
-			height: 1.65,
-			environment: PathBuf::default(),
-		}
-	}
-}
+use std::{path::Path, sync::Arc};
 
 #[allow(dead_code)]
 pub struct Atmosphere {
-	config: Config,
-	environment: Option<Environment>,
+	environment: Environment,
 	root: Spatial,
 }
 impl Atmosphere {
-	pub fn new(client: &Arc<Client>) -> Result<Self> {
-		let config: Config = dbg!(confy::load("atmosphere", "atmosphere")?);
+	pub fn new(client: &Arc<Client>, config: &Config, env_name: Option<String>) -> Self {
 		let data_path = dirs::config_dir()
 			.unwrap()
 			.join("atmosphere/environments")
-			.join(&config.environment)
+			.join(
+				env_name
+					.as_ref()
+					.map(Path::new)
+					.unwrap_or(&config.environment),
+			)
 			.join("env.toml");
-		let root = Spatial::create(client.get_root(), Transform::default(), false)?;
-		root.set_position(Some(client.get_hmd()), Vector3::from([0.0, 0.0, 0.0]))?;
-		root.set_position(None, Vector3::from([0.0, -config.height, 0.0]))?;
-		let environment_data = EnvironmentData::load(&data_path)?;
-		let environment = Some(Environment::from_data(&root, data_path, environment_data)?);
+		let root = Spatial::create(client.get_root(), Transform::default(), false).unwrap();
+		root.set_position(Some(client.get_hmd()), Vector3::from([0.0, 0.0, 0.0]))
+			.unwrap();
+		root.set_position(None, Vector3::from([0.0, -config.height, 0.0]))
+			.unwrap();
+		let environment_data = EnvironmentData::load(&data_path).unwrap();
+		let environment = Environment::from_data(&root, data_path, environment_data).unwrap();
 		dbg!(&environment);
-		Ok(Atmosphere {
-			config,
-			root,
-			environment,
-		})
+		Atmosphere { root, environment }
 	}
 }
