@@ -21,7 +21,7 @@ impl Environment {
 		config_path: PathBuf,
 		data: EnvironmentData,
 	) -> Result<Self> {
-		let root = Spatial::create(parent, Transform::from_position(data.root), true)?;
+		let root = Spatial::create(parent, Transform::from_position(data.root), false)?;
 		let client = parent.client().unwrap();
 		let config_folder = config_path.parent().unwrap();
 		if let Some(sky) = &data.sky {
