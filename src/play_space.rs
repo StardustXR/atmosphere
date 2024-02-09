@@ -2,14 +2,13 @@ use mint::Vector2;
 use serde::{Deserialize, Serialize};
 use stardust_xr_fusion::{
 	client::Client,
-	core::values::Transform,
-	data::{NewReceiverInfo, PulseReceiver, PulseSender, PulseSenderHandler},
+	core::values::Datamap,
+	data::{PulseReceiver, PulseSender, PulseSenderAspect, PulseSenderHandler},
 	fields::UnknownField,
 	node::{NodeError, NodeType},
-	spatial::Spatial,
+	spatial::Transform,
 	HandlerWrapper,
 };
-use stardust_xr_molecules::datamap::Datamap;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct PlaySpaceMap {
@@ -25,33 +24,30 @@ impl Default for PlaySpaceMap {
 	}
 }
 
-pub struct PlaySpaceFinder(Option<PulseReceiver>);
+pub struct PlaySpaceFinder(Option<(String, PulseReceiver)>);
 impl PlaySpaceFinder {
 	pub fn new(client: &Client) -> Result<HandlerWrapper<PulseSender, PlaySpaceFinder>, NodeError> {
 		PulseSender::create(
 			client.get_root(),
 			Transform::none(),
-			&Datamap::create(PlaySpaceMap::default()).serialize(),
+			&Datamap::from_typed(PlaySpaceMap::default()).unwrap(),
 		)?
 		.wrap(PlaySpaceFinder(None))
 	}
-	pub fn play_space(&self) -> Option<Spatial> {
-		self.0.as_deref().map(NodeType::alias)
+	pub fn play_space(&self) -> Option<PulseReceiver> {
+		self.0.as_ref().map(|s| &s.1).map(NodeType::alias)
 	}
 }
 impl PulseSenderHandler for PlaySpaceFinder {
-	fn new_receiver(
-		&mut self,
-		_info: NewReceiverInfo,
-		receiver: PulseReceiver,
-		_field: UnknownField,
-	) {
-		self.0.replace(receiver);
+	fn new_receiver(&mut self, uid: String, receiver: PulseReceiver, _field: UnknownField) {
+		self.0.replace((uid, receiver));
 	}
 
-	fn drop_receiver(&mut self, uid: &str) {
-		let Some(rx) = &self.0 else {return};
-		if rx.node().get_name().unwrap() == uid {
+	fn drop_receiver(&mut self, uid: String) {
+		let Some((self_uid, _rx)) = &self.0 else {
+			return;
+		};
+		if &uid == self_uid {
 			self.0.take();
 		}
 	}

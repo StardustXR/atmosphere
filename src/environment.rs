@@ -2,10 +2,10 @@ use crate::environment_data::{EnvironmentData, Rotation, Scale};
 use color_eyre::eyre::Result;
 use rustc_hash::FxHashMap;
 use stardust_xr_fusion::{
-	core::values::Transform,
-	drawable::{set_sky_light, set_sky_tex, set_sky_tex_light, Model, ResourceID},
+	core::values::ResourceID,
+	drawable::{set_sky_light, set_sky_tex, Model},
 	node::{NodeError, NodeType},
-	spatial::Spatial,
+	spatial::{Spatial, SpatialAspect, Transform},
 };
 use std::{fmt::Debug, path::PathBuf};
 
@@ -21,17 +21,21 @@ impl Environment {
 		config_path: PathBuf,
 		data: EnvironmentData,
 	) -> Result<Self> {
-		let root = Spatial::create(parent, Transform::from_position(data.root), false)?;
+		let root = Spatial::create(parent, Transform::from_translation(data.root), false)?;
 		let client = parent.client().unwrap();
 		let config_folder = config_path.parent().unwrap();
 		if let Some(sky) = &data.sky {
-			set_sky_tex_light(&client, &config_folder.join(sky))?;
+			let resource = ResourceID::Direct(config_folder.join(sky));
+			set_sky_tex(&client, &resource)?;
+			set_sky_light(&client, &resource)?;
 		}
 		if let Some(sky_tex) = &data.sky_tex {
-			set_sky_tex(&client, &config_folder.join(sky_tex))?;
+			let resource = ResourceID::Direct(config_folder.join(sky_tex));
+			set_sky_tex(&client, &resource)?;
 		}
 		if let Some(sky_light) = &data.sky_light {
-			set_sky_light(&client, &config_folder.join(sky_light))?;
+			let resource = ResourceID::Direct(config_folder.join(sky_light));
+			set_sky_light(&client, &resource)?;
 		}
 		let spatials_data = data.spatials.clone().unwrap_or_default();
 		let spatials: Result<FxHashMap<String, Spatial>, NodeError> = spatials_data
@@ -40,7 +44,7 @@ impl Environment {
 				let spatial = Spatial::create(
 					&root,
 					Transform {
-						position: data.position,
+						translation: data.position,
 						rotation: data.rotation.as_ref().map(Rotation::to_quat),
 						scale: data.scale.as_ref().map(Scale::to_vec),
 					},
@@ -72,7 +76,7 @@ impl Environment {
 					.as_ref()
 					.and_then(|spatial| spatials.get(spatial))
 					.unwrap_or(&root);
-				let model = Model::create(parent, Transform::default(), &ResourceID::Direct(path))?;
+				let model = Model::create(parent, Transform::none(), &ResourceID::Direct(path))?;
 
 				Ok((name.clone(), model))
 			})
