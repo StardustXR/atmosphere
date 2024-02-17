@@ -1,4 +1,5 @@
 mod atmosphere;
+mod auto_zone_capture;
 mod config;
 mod environment;
 mod environment_data;
@@ -37,12 +38,17 @@ fn main() {
 #[tokio::main(flavor = "current_thread")]
 async fn show(config: &Config, env_name: Option<String>) {
 	let (client, event_loop) = Client::connect_with_async_loop().await.unwrap();
-	let _atmosphere = client.wrap_root(Atmosphere::new(&client, &config, env_name));
+	let _atmosphere = client
+		.wrap_root(Atmosphere::new(&client, &config, env_name))
+		.unwrap();
 
 	tokio::select! {
-		e = tokio::signal::ctrl_c() => e.unwrap(),
+		e = tokio::signal::ctrl_c() => {
+			_atmosphere.lock().reset();
+			e.unwrap()
+		},
 		e = event_loop => e.unwrap().unwrap(),
-	};
+	}
 }
 
 fn install(path: PathBuf) {
