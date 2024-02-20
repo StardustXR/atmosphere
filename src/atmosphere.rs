@@ -168,7 +168,7 @@ impl Atmosphere {
 			if let Some(position) = position {
 				let offset = position - previous_position;
 				let offset_magnify = (offset.length() * info.delta as f32).powf(0.9);
-				dbg!(offset_magnify);
+				// dbg!(offset_magnify);
 				self.velocity += offset.normalize_or_zero() * offset_magnify;
 				// let _ = self
 				// .root
@@ -196,7 +196,7 @@ impl RootHandler for Atmosphere {
 		self.input_update(info);
 		self.offset += self.velocity;
 		self.offset.y = self.offset.y.min(0.0);
-		dbg!(self.velocity);
+		// dbg!(self.velocity);
 		let _ = self
 			.root
 			.set_local_transform(Transform::from_translation(self.offset));
