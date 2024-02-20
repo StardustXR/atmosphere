@@ -83,7 +83,8 @@ impl Atmosphere {
 			|data, _| {
 				data.datamap.with_data(|d| match &data.input {
 					InputDataType::Hand(_) => d.idx("grab_strength").as_f32() > 0.9,
-					_ => d.idx("grab").as_f32() > 0.9,
+					InputDataType::Tip(_) => d.idx("grab").as_f32() > 0.9,
+					_ => false,
 				})
 			},
 			true,
