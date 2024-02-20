@@ -3,9 +3,10 @@ use crate::{
 	environment_data::EnvironmentData, play_space::PlaySpaceFinder, Config,
 };
 use glam::{vec3, Mat4, Vec3};
+use serde::{Deserialize, Serialize};
 use stardust_xr_fusion::{
 	client::{Client, ClientState, FrameInfo, RootHandler},
-	core::values::rgba_linear,
+	core::{schemas::flex::flexbuffers, values::rgba_linear},
 	data::PulseSender,
 	drawable::{Lines, LinesAspect},
 	fields::SphereField,
@@ -18,11 +19,23 @@ use stardust_xr_molecules::{
 	input_action::{BaseInputAction, InputActionHandler, SingleActorAction},
 	lines::{circle, LineExt},
 };
-use std::{f32::consts::FRAC_PI_2, path::Path, sync::Arc};
+use std::{
+	f32::consts::FRAC_PI_2,
+	path::{Path, PathBuf},
+	sync::Arc,
+};
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct AtmosphereState {
+	env_path: Option<PathBuf>,
+	offset: Vec3,
+	velocity: Vec3,
+}
 
 #[allow(dead_code)]
 pub struct Atmosphere {
 	play_space_finder: HandlerWrapper<PulseSender, PlaySpaceFinder>,
+	client_root: Spatial,
 	reference_space: Spatial,
 	root: Spatial,
 	environment: Environment,
@@ -30,8 +43,7 @@ pub struct Atmosphere {
 	_zone_field: SphereField,
 	zone: HandlerWrapper<Zone, AutoZoneCapture>,
 
-	offset: Vec3,
-	velocity: Vec3,
+	state: AtmosphereState,
 	signifiers: Lines,
 	_input_field: SphereField,
 	input_handler: HandlerWrapper<InputHandler, InputActionHandler<()>>,
@@ -41,17 +53,20 @@ pub struct Atmosphere {
 }
 impl Atmosphere {
 	pub fn new(client: &Arc<Client>, config: &Config, env_name: Option<String>) -> Self {
+		let state: AtmosphereState =
+			flexbuffers::from_slice(&client.state().data).unwrap_or_default();
+		let env_path = state
+			.env_path
+			.as_deref()
+			.or_else(|| env_name.as_ref().map(Path::new))
+			.unwrap_or(&config.environment);
 		let data_path = dirs::config_dir()
 			.unwrap()
 			.join("atmosphere/environments")
-			.join(
-				env_name
-					.as_ref()
-					.map(Path::new)
-					.unwrap_or(&config.environment),
-			)
+			.join(env_path)
 			.join("env.toml");
 
+		let client_root = client.get_root().alias();
 		let reference_space = Spatial::create(client.get_root(), Transform::none(), false).unwrap();
 		reference_space
 			.set_relative_transform(client.get_root(), Transform::from_translation([0.0; 3]))
@@ -93,6 +108,7 @@ impl Atmosphere {
 			Lines::create(input_handler.node().as_ref(), Transform::identity(), &[]).unwrap();
 
 		Atmosphere {
+			client_root,
 			reference_space,
 			root,
 			environment,
@@ -100,8 +116,7 @@ impl Atmosphere {
 			_zone_field,
 			zone,
 
-			offset: Default::default(),
-			velocity: Default::default(),
+			state,
 			_input_field,
 			input_handler,
 			previous_position: None,
@@ -169,7 +184,7 @@ impl Atmosphere {
 				let offset = position - previous_position;
 				let offset_magnify = (offset.length() * info.delta as f32).powf(0.9);
 				// dbg!(offset_magnify);
-				self.velocity += offset.normalize_or_zero() * offset_magnify;
+				self.state.velocity += offset.normalize_or_zero() * offset_magnify;
 				// let _ = self
 				// .root
 				// .set_relative_transform(&self.root, Transform::from_translation(offset));
@@ -192,14 +207,14 @@ impl Atmosphere {
 
 impl RootHandler for Atmosphere {
 	fn frame(&mut self, info: FrameInfo) {
-		self.velocity *= 0.99;
+		self.state.velocity *= 0.99;
 		self.input_update(info);
-		self.offset += self.velocity;
-		self.offset.y = self.offset.y.min(0.0);
+		self.state.offset += self.state.velocity;
+		self.state.offset.y = self.state.offset.y.min(0.0);
 		// dbg!(self.velocity);
 		let _ = self
 			.root
-			.set_local_transform(Transform::from_translation(self.offset));
+			.set_local_transform(Transform::from_translation(self.state.offset));
 
 		self.zone.node().update().unwrap();
 		if let Some(play_space) = self.play_space_finder.lock_wrapped().play_space().take() {
@@ -210,6 +225,10 @@ impl RootHandler for Atmosphere {
 	}
 
 	fn save_state(&mut self) -> ClientState {
-		ClientState::default()
+		ClientState {
+			data: flexbuffers::to_vec(&self.state).unwrap(),
+			root: self.client_root.alias(),
+			spatial_anchors: Default::default(),
+		}
 	}
 }
