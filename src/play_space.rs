@@ -4,7 +4,7 @@ use stardust_xr_fusion::{
 	client::Client,
 	core::values::Datamap,
 	data::{PulseReceiver, PulseSender, PulseSenderAspect, PulseSenderHandler},
-	fields::UnknownField,
+	fields::Field,
 	node::{NodeError, NodeType},
 	spatial::Transform,
 	HandlerWrapper,
@@ -24,7 +24,7 @@ impl Default for PlaySpaceMap {
 	}
 }
 
-pub struct PlaySpaceFinder(Option<(String, PulseReceiver)>);
+pub struct PlaySpaceFinder(Option<(u64, PulseReceiver)>);
 impl PlaySpaceFinder {
 	pub fn new(client: &Client) -> Result<HandlerWrapper<PulseSender, PlaySpaceFinder>, NodeError> {
 		PulseSender::create(
@@ -39,15 +39,16 @@ impl PlaySpaceFinder {
 	}
 }
 impl PulseSenderHandler for PlaySpaceFinder {
-	fn new_receiver(&mut self, uid: String, receiver: PulseReceiver, _field: UnknownField) {
-		self.0.replace((uid, receiver));
+	fn new_receiver(&mut self, receiver: PulseReceiver, _field: Field) {
+		self.0
+			.replace((receiver.node().get_id().unwrap(), receiver));
 	}
 
-	fn drop_receiver(&mut self, uid: String) {
+	fn drop_receiver(&mut self, id: u64) {
 		let Some((self_uid, _rx)) = &self.0 else {
 			return;
 		};
-		if &uid == self_uid {
+		if &id == self_uid {
 			self.0.take();
 		}
 	}

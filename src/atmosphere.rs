@@ -2,21 +2,24 @@ use crate::{
 	auto_zone_capture::AutoZoneCapture, environment::Environment,
 	environment_data::EnvironmentData, play_space::PlaySpaceFinder, Config,
 };
+use color_eyre::eyre::Result;
 use glam::{vec3, Mat4, Vec3};
 use serde::{Deserialize, Serialize};
 use stardust_xr_fusion::{
-	client::{Client, ClientState, FrameInfo, RootHandler},
-	core::{schemas::flex::flexbuffers, values::rgba_linear},
+	client::Client,
 	data::PulseSender,
 	drawable::{Lines, LinesAspect},
-	fields::SphereField,
+	fields::{Field, Shape},
 	input::{InputDataType, InputHandler},
 	node::NodeType,
+	objects::hmd,
+	root::{ClientState, FrameInfo, RootHandler},
 	spatial::{Spatial, SpatialAspect, Transform, Zone, ZoneAspect},
+	values::color::rgba_linear,
 	HandlerWrapper,
 };
 use stardust_xr_molecules::{
-	input_action::{BaseInputAction, InputActionHandler, SingleActorAction},
+	input_action::{InputQueue, InputQueueable, SingleActorAction},
 	lines::{circle, LineExt},
 };
 use std::{
@@ -25,7 +28,7 @@ use std::{
 	sync::Arc,
 };
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct AtmosphereState {
 	env_path: Option<PathBuf>,
 	offset: Vec3,
@@ -35,26 +38,23 @@ pub struct AtmosphereState {
 #[allow(dead_code)]
 pub struct Atmosphere {
 	play_space_finder: HandlerWrapper<PulseSender, PlaySpaceFinder>,
-	client_root: Spatial,
 	reference_space: Spatial,
 	root: Spatial,
 	environment: Environment,
 
-	_zone_field: SphereField,
+	_zone_field: Field,
 	zone: HandlerWrapper<Zone, AutoZoneCapture>,
 
 	state: AtmosphereState,
 	signifiers: Lines,
-	_input_field: SphereField,
-	input_handler: HandlerWrapper<InputHandler, InputActionHandler<()>>,
+	_input_field: Field,
+	input: InputQueue,
 	previous_position: Option<Vec3>,
-	condition_action: BaseInputAction<()>,
-	move_action: SingleActorAction<()>,
+	move_action: SingleActorAction,
 }
 impl Atmosphere {
-	pub fn new(client: &Arc<Client>, config: &Config, env_name: Option<String>) -> Self {
-		let state: AtmosphereState =
-			flexbuffers::from_slice(&client.state().data).unwrap_or_default();
+	pub async fn new(client: &Arc<Client>, config: &Config, env_name: Option<String>) -> Self {
+		let state: AtmosphereState = client.get_state().data().unwrap_or_default();
 		let env_path = state
 			.env_path
 			.as_deref()
@@ -66,7 +66,6 @@ impl Atmosphere {
 			.join(env_path)
 			.join("env.toml");
 
-		let client_root = client.get_root().alias();
 		let reference_space = Spatial::create(client.get_root(), Transform::none(), false).unwrap();
 		reference_space
 			.set_relative_transform(client.get_root(), Transform::from_translation([0.0; 3]))
@@ -81,34 +80,28 @@ impl Atmosphere {
 		dbg!(&environment);
 		let play_space_finder = PlaySpaceFinder::new(&client).unwrap();
 
-		let _zone_field = SphereField::create(&root, [0.0; 3], 1000.0).unwrap();
+		let _zone_field =
+			Field::create(&root, Transform::identity(), Shape::Sphere(1000.0)).unwrap();
 		let zone = Zone::create(&root, Transform::identity(), &_zone_field).unwrap();
 		let zone_handler = AutoZoneCapture(zone.alias(), Default::default());
 		let zone = zone.wrap(zone_handler).unwrap();
 
-		let _input_field = SphereField::create(client.get_hmd(), [0.0; 3], 0.0).unwrap();
-		let input_handler = InputActionHandler::wrap(
-			InputHandler::create(client.get_root(), Transform::identity(), &_input_field).unwrap(),
-			(),
+		let _input_field = Field::create(
+			&hmd(client).await.unwrap(),
+			Transform::identity(),
+			Shape::Sphere(0.0),
 		)
 		.unwrap();
-		let condition_action = BaseInputAction::new(false, |d, _| d.order == 0);
-		let move_action = SingleActorAction::new(
-			true,
-			|data, _| {
-				data.datamap.with_data(|d| match &data.input {
-					InputDataType::Hand(_) => d.idx("grab_strength").as_f32() > 0.9,
-					InputDataType::Tip(_) => d.idx("grab").as_f32() > 0.9,
-					_ => false,
-				})
-			},
-			true,
-		);
-		let signifiers =
-			Lines::create(input_handler.node().as_ref(), Transform::identity(), &[]).unwrap();
+		let input = InputHandler::create(client.get_root(), Transform::identity(), &_input_field)
+			.unwrap()
+			.queue()
+			.unwrap();
+
+		let move_action = SingleActorAction::default();
+
+		let signifiers = Lines::create(input.handler(), Transform::identity(), &[]).unwrap();
 
 		Atmosphere {
-			client_root,
 			reference_space,
 			root,
 			environment,
@@ -118,9 +111,8 @@ impl Atmosphere {
 
 			state,
 			_input_field,
-			input_handler,
+			input,
 			previous_position: None,
-			condition_action,
 			move_action,
 			signifiers,
 
@@ -129,18 +121,28 @@ impl Atmosphere {
 	}
 
 	fn input_update(&mut self, info: FrameInfo) {
-		self.input_handler
-			.lock_wrapped()
-			.update_actions([&mut self.condition_action, self.move_action.base_mut()]);
-		self.move_action.update(Some(&mut self.condition_action));
-		// dbg!(&self.condition_action.currently_acting.len());
-		// dbg!(&self.move_action.actor().is_some());
+		self.move_action.update(
+			true,
+			&self.input,
+			// |d| d.order == 0,
+			|_| true,
+			|data| {
+				data.datamap.with_data(|d| match &data.input {
+					InputDataType::Hand(_) => d.idx("grab_strength").as_f32() > 0.9,
+					InputDataType::Tip(_) => d.idx("grab").as_f32() > 0.9,
+					_ => false,
+				})
+			},
+		);
+		// dbg!(&self.move_action);
 
 		// draw the lines to indicate we can move the world
 		let signifier_lines = self
-			.condition_action
-			.currently_acting
-			.union(&self.move_action.base().currently_acting)
+			.move_action
+			.condition()
+			.currently_acting()
+			.into_iter()
+			.chain(self.move_action.actor())
 			.filter_map(|i| match &i.input {
 				InputDataType::Hand(h) => Some((
 					i,
@@ -224,11 +226,7 @@ impl RootHandler for Atmosphere {
 		}
 	}
 
-	fn save_state(&mut self) -> ClientState {
-		ClientState {
-			data: flexbuffers::to_vec(&self.state).unwrap(),
-			root: self.client_root.alias(),
-			spatial_anchors: Default::default(),
-		}
+	fn save_state(&mut self) -> Result<ClientState> {
+		ClientState::from_data_root(Some(self.state.clone()), &self.reference_space)
 	}
 }
