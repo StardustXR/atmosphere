@@ -95,7 +95,7 @@ impl Debug for Environment {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.debug_struct("Environment")
 			.field("data", &self.data)
-			.field("root", &self.root.node().get_path())
+			.field("root", &self.root.node().get_id())
 			.field("spatials", &self.spatials.keys())
 			.field("models", &self.models.keys())
 			.finish()

@@ -9,7 +9,7 @@ use crate::config::Config;
 use atmosphere::Atmosphere;
 use clap::{Parser, Subcommand};
 use copy_dir::copy_dir;
-use stardust_xr_fusion::client::Client;
+use stardust_xr_fusion::{client::Client, node::NodeType, root::RootAspect};
 use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
@@ -39,12 +39,14 @@ fn main() {
 async fn show(config: &Config, env_name: Option<String>) {
 	let (client, event_loop) = Client::connect_with_async_loop().await.unwrap();
 	let _atmosphere = client
-		.wrap_root(Atmosphere::new(&client, &config, env_name))
+		.get_root()
+		.alias()
+		.wrap(Atmosphere::new(&client, &config, env_name).await)
 		.unwrap();
 
 	tokio::select! {
 		e = tokio::signal::ctrl_c() => {
-			_atmosphere.lock().reset();
+			_atmosphere.lock_wrapped().reset();
 			e.unwrap()
 		},
 		e = event_loop => e.unwrap().unwrap(),
