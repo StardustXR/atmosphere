@@ -8,9 +8,9 @@ use serde::{Deserialize, Serialize};
 use stardust_xr_fusion::{
 	client::Client,
 	data::PulseSender,
-	drawable::{Lines, LinesAspect},
+	drawable::{Line, Lines, LinesAspect},
 	fields::{Field, Shape},
-	input::{InputDataType, InputHandler},
+	input::{InputData, InputDataType, InputHandler},
 	node::NodeType,
 	objects::hmd,
 	root::{ClientState, FrameInfo, RootHandler},
@@ -19,7 +19,7 @@ use stardust_xr_fusion::{
 	HandlerWrapper,
 };
 use stardust_xr_molecules::{
-	input_action::{InputQueue, InputQueueable, SingleActorAction},
+	input_action::{InputQueue, InputQueueable, SingleAction},
 	lines::{circle, LineExt},
 };
 use std::{
@@ -50,7 +50,7 @@ pub struct Atmosphere {
 	_input_field: Field,
 	input: InputQueue,
 	previous_position: Option<Vec3>,
-	move_action: SingleActorAction,
+	move_action: SingleAction,
 }
 impl Atmosphere {
 	pub async fn new(client: &Arc<Client>, config: &Config, env_name: Option<String>) -> Self {
@@ -97,7 +97,7 @@ impl Atmosphere {
 			.queue()
 			.unwrap();
 
-		let move_action = SingleActorAction::default();
+		let move_action = SingleAction::default();
 
 		let signifiers = Lines::create(input.handler(), Transform::identity(), &[]).unwrap();
 
@@ -125,51 +125,19 @@ impl Atmosphere {
 			true,
 			&self.input,
 			// |d| d.order == 0,
-			|_| true,
+			|data| match &data.input {
+				InputDataType::Pointer(_) => false,
+				_ => true,
+			},
 			|data| {
 				data.datamap.with_data(|d| match &data.input {
 					InputDataType::Hand(_) => d.idx("grab_strength").as_f32() > 0.9,
-					InputDataType::Tip(_) => d.idx("grab").as_f32() > 0.9,
-					_ => false,
+					_ => d.idx("grab").as_f32() > 0.9,
 				})
 			},
 		);
-		// dbg!(&self.move_action);
 
-		// draw the lines to indicate we can move the world
-		let signifier_lines = self
-			.move_action
-			.condition()
-			.currently_acting()
-			.into_iter()
-			.chain(self.move_action.actor())
-			.filter_map(|i| match &i.input {
-				InputDataType::Hand(h) => Some((
-					i,
-					Mat4::from_rotation_translation(h.palm.rotation.into(), h.palm.position.into()),
-				)),
-				InputDataType::Tip(t) => Some((
-					i,
-					Mat4::from_rotation_translation(t.orientation.into(), t.origin.into()),
-				)),
-				_ => None,
-			})
-			.map(|(i, t)| {
-				let line = circle(64, 0.0, 0.1)
-					.transform(Mat4::from_rotation_x(FRAC_PI_2))
-					.transform(Mat4::from_translation(vec3(0.0, 0.05, -0.02)))
-					.transform(t);
-
-				let grabbed = self.move_action.actor() == Some(i);
-
-				if grabbed {
-					line.color(rgba_linear!(0.0, 0.549, 1.0, 1.0))
-				} else {
-					line
-				}
-			})
-			.collect::<Vec<_>>();
-		self.signifiers.set_lines(&signifier_lines).unwrap();
+		self.update_signifiers();
 
 		let position = self.move_action.actor().map(|p| match &p.input {
 			InputDataType::Hand(h) => h.palm.position.into(),
@@ -197,6 +165,53 @@ impl Atmosphere {
 		}
 
 		self.previous_position = position;
+	}
+
+	// draw the lines to indicate we can move the world
+	fn update_signifiers(&self) {
+		let mut signifier_lines = self
+			.move_action
+			.hovering()
+			.current()
+			.iter()
+			.map(|input| Self::generate_signifier(input, false))
+			.collect::<Vec<_>>();
+		signifier_lines.extend(
+			self.move_action
+				.actor()
+				.map(|input| Self::generate_signifier(input, true)),
+		);
+		self.signifiers.set_lines(&signifier_lines).unwrap();
+	}
+
+	fn generate_signifier(input: &InputData, grabbing: bool) -> Line {
+		let transform = match &input.input {
+			InputDataType::Pointer(_) => panic!("awawawawawawa"),
+			InputDataType::Hand(h) => {
+				Mat4::from_rotation_translation(h.palm.rotation.into(), h.palm.position.into())
+					* Mat4::from_translation(vec3(0.0, 0.05, -0.02))
+					* Mat4::from_rotation_x(FRAC_PI_2)
+			}
+			InputDataType::Tip(t) => {
+				Mat4::from_rotation_translation(t.orientation.into(), t.origin.into())
+			}
+		};
+
+		let line = circle(
+			64,
+			0.0,
+			match &input.input {
+				InputDataType::Pointer(_) => panic!("awawawawawawa"),
+				InputDataType::Hand(_) => 0.1,
+				InputDataType::Tip(_) => 0.0025,
+			},
+		)
+		.transform(transform);
+		if grabbing {
+			line.color(rgba_linear!(0.0, 0.549, 1.0, 1.0))
+		} else {
+			line
+		}
 	}
 
 	pub fn reset(&mut self) {
