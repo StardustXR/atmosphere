@@ -37,8 +37,13 @@ fn main() {
 	}
 }
 
+#[inline]
+pub fn environments_dir() -> PathBuf {
+	dirs::data_local_dir().unwrap().join("xr_environments")
+}
+
 fn list() {
-	let environment_dir = dirs::config_dir().unwrap().join("atmosphere/environments");
+	let environment_dir = environments_dir();
 	for dir in environment_dir.read_dir().unwrap() {
 		let Ok(dir) = dir else {
 			continue;
@@ -81,7 +86,7 @@ async fn show(config: &Config, env_name: Option<String>) {
 }
 
 fn install(path: PathBuf) {
-	let environment_dir = dirs::config_dir().unwrap().join("atmosphere/environments");
+	let environment_dir = environments_dir();
 	if std::fs::metadata(path.join("env.toml")).is_err() {
 		panic!("{} does not contain an env.toml file!", path.display());
 	}
@@ -95,10 +100,7 @@ fn install(path: PathBuf) {
 }
 
 fn set_default(mut config: Config, env_name: String) {
-	let environment_dir = dirs::config_dir()
-		.unwrap()
-		.join("atmosphere/environments")
-		.join(&env_name);
+	let environment_dir = environments_dir().join(&env_name);
 	if std::fs::metadata(environment_dir).is_err() {
 		panic!("Environment {env_name} does not exist, you may have to install it.");
 	}

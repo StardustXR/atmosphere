@@ -1,6 +1,6 @@
 use crate::{
 	auto_zone_capture::AutoZoneCapture, environment::Environment,
-	environment_data::EnvironmentData, play_space::PlaySpaceFinder, Config,
+	environment_data::EnvironmentData, environments_dir, play_space::PlaySpaceFinder, Config,
 };
 use color_eyre::eyre::Result;
 use glam::{vec3, Mat4, Vec3};
@@ -60,11 +60,7 @@ impl Atmosphere {
 			.as_deref()
 			.or_else(|| env_name.as_ref().map(Path::new))
 			.unwrap_or(&config.environment);
-		let data_path = dirs::config_dir()
-			.unwrap()
-			.join("atmosphere/environments")
-			.join(env_path)
-			.join("env.kdl");
+		let data_path = environments_dir().join(env_path).join("env.kdl");
 
 		let reference_space = Spatial::create(client.get_root(), Transform::none(), false).unwrap();
 		reference_space
