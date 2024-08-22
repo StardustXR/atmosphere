@@ -39,7 +39,11 @@ fn main() {
 
 #[inline]
 pub fn environments_dir() -> PathBuf {
-	dirs::data_local_dir().unwrap().join("xr_environments")
+	let dir = dirs::data_local_dir().unwrap().join("xr_environments");
+	if !dir.exists() {
+		let _ = std::fs::create_dir_all(&dir);
+	}
+	dir
 }
 
 fn list() {
