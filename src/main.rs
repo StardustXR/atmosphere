@@ -87,8 +87,8 @@ async fn show(config: &Config, env_name: Option<String>) {
 
 fn install(path: PathBuf) {
 	let environment_dir = environments_dir();
-	if std::fs::metadata(path.join("env.toml")).is_err() {
-		panic!("{} does not contain an env.toml file!", path.display());
+	if std::fs::metadata(path.join("env.kdl")).is_err() {
+		panic!("{} does not contain an env.kdl file!", path.display());
 	}
 	let dest_path = environment_dir.join(path.file_name().unwrap());
 	copy_dir(path, &dest_path).unwrap();
