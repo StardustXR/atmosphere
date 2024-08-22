@@ -20,6 +20,7 @@ struct Cli {
 }
 #[derive(Debug, Subcommand)]
 enum Commands {
+	List,
 	Install { path: PathBuf },
 	SetDefault { env_name: String },
 	Show { env_name: Option<String> },
@@ -29,9 +30,33 @@ fn main() {
 	let args = Cli::parse();
 	let config: Config = confy::load("atmosphere", "atmosphere").unwrap();
 	match args.command {
+		Commands::List => list(),
 		Commands::Install { path } => install(path),
 		Commands::SetDefault { env_name } => set_default(config, env_name),
 		Commands::Show { env_name } => show(&config, env_name),
+	}
+}
+
+fn list() {
+	let environment_dir = dirs::config_dir().unwrap().join("atmosphere/environments");
+	for dir in environment_dir.read_dir().unwrap() {
+		let Ok(dir) = dir else {
+			continue;
+		};
+		if dir.file_type().unwrap().is_file() {
+			continue;
+		}
+
+		let status = dir.path().join("env.kdl").exists();
+		println!(
+			"{}: {}",
+			dir.file_name().to_string_lossy(),
+			if status {
+				"valid"
+			} else {
+				"invalid (missing env.kdl)"
+			}
+		);
 	}
 }
 
