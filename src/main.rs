@@ -43,7 +43,7 @@ async fn show(config: &Config, env_name: Option<String>) {
 	let _atmosphere = client
 		.get_root()
 		.alias()
-		.wrap(Atmosphere::new(&client, &config, env_name).await)
+		.wrap(Atmosphere::new(&client, config, env_name).await)
 		.unwrap();
 
 	tokio::select! {

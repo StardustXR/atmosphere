@@ -64,7 +64,7 @@ impl Atmosphere {
 			.unwrap()
 			.join("atmosphere/environments")
 			.join(env_path)
-			.join("env.toml");
+			.join("env.kdl");
 
 		let reference_space = Spatial::create(client.get_root(), Transform::none(), false).unwrap();
 		reference_space
@@ -75,10 +75,9 @@ impl Atmosphere {
 			.unwrap();
 		let root = Spatial::create(&reference_space, Transform::none(), false).unwrap();
 
-		let environment_data = EnvironmentData::load(&data_path).unwrap();
+		let environment_data = EnvironmentData::load(&data_path);
 		let environment = Environment::from_data(&root, data_path, environment_data).unwrap();
-		dbg!(&environment);
-		let play_space_finder = PlaySpaceFinder::new(&client).unwrap();
+		let play_space_finder = PlaySpaceFinder::new(client).unwrap();
 
 		let _zone_field =
 			Field::create(&root, Transform::identity(), Shape::Sphere(1000.0)).unwrap();
@@ -125,10 +124,7 @@ impl Atmosphere {
 			true,
 			&self.input,
 			// |d| d.order == 0,
-			|data| match &data.input {
-				InputDataType::Pointer(_) => false,
-				_ => true,
-			},
+			|data| !matches!(&data.input, InputDataType::Pointer(_)),
 			|data| {
 				data.datamap.with_data(|d| match &data.input {
 					InputDataType::Hand(_) => d.idx("grab_strength").as_f32() > 0.9,
@@ -152,7 +148,7 @@ impl Atmosphere {
 		if let Some(previous_position) = self.previous_position {
 			if let Some(position) = position {
 				let offset = position - previous_position;
-				let offset_magnify = (offset.length() * info.delta as f32).powf(0.9);
+				let offset_magnify = (offset.length() * info.delta).powf(0.9);
 				// dbg!(offset_magnify);
 				self.state.velocity += offset.normalize_or_zero() * offset_magnify;
 				// let _ = self
