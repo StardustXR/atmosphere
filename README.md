@@ -7,3 +7,5 @@ atmosphere install default_envs/the_grid # or any other folder with an env.kdl f
 atmosphere set-default the_grid
 atmosphere show # the_grid implied since set to default
 ```
+
+To make your own, follow the comments and structure of the `the_grid` environment in this repo.
