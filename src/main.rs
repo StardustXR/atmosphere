@@ -1,16 +1,28 @@
-mod atmosphere;
-mod auto_zone_capture;
+mod cli;
 mod config;
-mod environment;
-mod environment_data;
-mod play_space;
+mod env;
+mod play_space_ref;
 
+use crate::cli::*;
 use crate::config::Config;
-use atmosphere::Atmosphere;
+use asteroids::{
+	Element,
+	client::ClientState,
+	custom::ElementTrait,
+	elements::{Model, Spatial},
+	util::Migrate,
+};
 use clap::{Parser, Subcommand};
-use copy_dir::copy_dir;
-use stardust_xr_fusion::{client::Client, node::NodeType, root::RootAspect};
-use std::path::PathBuf;
+use env::{Environment, Node, NodeType};
+use glam::Vec3;
+use play_space_ref::PlaySpace;
+use serde::{Deserialize, Serialize};
+use stardust_xr_fusion::{project_local_resources, spatial::Transform};
+use std::{
+	fs::DirEntry,
+	path::{Path, PathBuf},
+	sync::OnceLock,
+};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None)]
@@ -28,13 +40,97 @@ enum Commands {
 
 fn main() {
 	let args = Cli::parse();
-	let config: Config = confy::load("atmosphere", "atmosphere").unwrap();
 	match args.command {
 		Commands::List => list(),
 		Commands::Install { path } => install(path),
-		Commands::SetDefault { env_name } => set_default(config, env_name),
-		Commands::Show { env_name } => show(&config, env_name),
+		Commands::SetDefault { env_name } => {
+			let config: Config = confy::load("atmosphere", "atmosphere").unwrap();
+			set_default(config, env_name)
+		}
+		Commands::Show { .. } => show(),
 	}
+}
+
+#[derive(Serialize, Deserialize, Default)]
+pub struct State {
+	path: PathBuf,
+	#[serde(skip)]
+	env: OnceLock<Environment>,
+}
+impl Migrate for State {
+	type Old = Self;
+}
+impl ClientState for State {
+	const QUALIFIER: &'static str = "org";
+	const ORGANIZATION: &'static str = "stardustxr";
+	const NAME: &'static str = "atmoshpere";
+
+	fn initial_state_update(&mut self) {
+		if let Commands::Show { env_name } = Cli::parse().command {
+			let config: Config = confy::load("atmosphere", "atmosphere").unwrap();
+			let env_path = env_name
+				.as_ref()
+				.map(Path::new)
+				.unwrap_or(&config.environment);
+			let data_path = environments_dir().join(env_path);
+			self.path = data_path;
+		} else {
+			println!("somehow ran initial_state_update without using the show command")
+		}
+	}
+
+	fn reify(&self) -> asteroids::Element<Self> {
+		let env = self
+			.env
+			.get_or_init(|| Environment::load(self.path.join("env.kdl"), &self.path));
+		PlaySpace.with_children([reify_node(&env.root).expect("impossible")])
+	}
+}
+
+fn reify_node(node: &Node) -> Option<Element<State>> {
+	let node_type = &node.node_type;
+	let children = node.children.iter().filter_map(reify_node);
+	match node_type {
+		NodeType::Spatial => Some(
+			Spatial::default()
+				.zoneable(true)
+				.transform(node.transform)
+				.with_children(children)
+				.identify(&node.uuid),
+		),
+		NodeType::Model(path_buf) => Some(
+			match Model::direct(path_buf) {
+				Err(err) => {
+					println!(
+						"Error while loading model: {err}, from: {}",
+						path_buf.to_string_lossy()
+					);
+					return None;
+				}
+				Ok(v) => v,
+			}
+			.transform(node.transform)
+			.with_children(children)
+			.identify(&node.uuid),
+		),
+		NodeType::Box(scale) => Some(
+			Model::namespaced("atmoshpere", "box")
+				.transform({
+					let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
+					Transform {
+						scale: Some(scale.into()),
+						..node.transform
+					}
+				})
+				.with_children(children)
+				.identify(&node.uuid),
+		),
+	}
+}
+
+#[tokio::main(flavor = "current_thread")]
+async fn show() {
+	asteroids::client::run::<State>(&[&project_local_resources!("res")]).await
 }
 
 #[inline]
@@ -46,70 +142,12 @@ pub fn environments_dir() -> PathBuf {
 	dir
 }
 
-fn list() {
-	let environment_dir = environments_dir();
-	for dir in environment_dir.read_dir().unwrap() {
-		let Ok(dir) = dir else {
-			continue;
-		};
-		if dir.file_type().unwrap().is_file() {
-			continue;
-		}
-
-		let status = dir.path().join("env.kdl").exists();
-		println!(
-			"{}: {}",
-			dir.file_name().to_string_lossy(),
-			if status {
-				"valid"
-			} else {
-				"invalid (missing env.kdl)"
-			}
-		);
-	}
-}
-
-#[tokio::main(flavor = "current_thread")]
-async fn show(config: &Config, env_name: Option<String>) {
-	let (client, event_loop) = Client::connect_with_async_loop()
-		.await
-		.expect("Connect to stardust server failed");
-	let _atmosphere = client
-		.get_root()
-		.alias()
-		.wrap(Atmosphere::new(&client, config, env_name).await)
-		.unwrap();
-
-	tokio::select! {
-		e = tokio::signal::ctrl_c() => {
-			_atmosphere.lock_wrapped().reset();
-			e.unwrap()
-		},
-		e = event_loop => e.unwrap().unwrap(),
-	}
-}
-
-fn install(path: PathBuf) {
-	let environment_dir = environments_dir();
-	if std::fs::metadata(path.join("env.kdl")).is_err() {
-		panic!("{} does not contain an env.kdl file!", path.display());
-	}
-	let dest_path = environment_dir.join(path.file_name().unwrap());
-	copy_dir(path, &dest_path).unwrap();
-	println!(
-		"Installed environment {} to {}",
-		dest_path.file_name().unwrap().to_string_lossy(),
-		dest_path.display()
-	);
-}
-
-fn set_default(mut config: Config, env_name: String) {
-	let environment_dir = environments_dir().join(&env_name);
-	if std::fs::metadata(environment_dir).is_err() {
-		panic!("Environment {env_name} does not exist, you may have to install it.");
-	}
-
-	config.environment = env_name.into();
-
-	confy::store("atmosphere", "atmosphere", config).unwrap();
+pub fn get_list() -> Vec<DirEntry> {
+	environments_dir()
+		.read_dir()
+		.unwrap()
+		.filter_map(|dir| dir.ok())
+		.filter(|dir| !dir.file_type().unwrap().is_file())
+		// .filter(|dir| dir.path().join("env.kdl").exists())
+		.collect::<Vec<_>>()
 }
