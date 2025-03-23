@@ -1,7 +1,7 @@
 [package]
 name = "stardust-xr-atmosphere"
 version = "0.4.0"
-edition = "2021"
+edition = "2024"
 description = "Stardust XR's reference environment/homespace client"
 authors = ["Nova King <technobaboo@proton.me>"]
 license = "MIT"
@@ -26,6 +26,8 @@ copy_dir = "0.1.3"
 knuffel = "3.2.0"
 serde_kdl = "0.1.0"
 kdl = "4.6.0"
+uuid = { version = "1.16.0", features = ["v4", "rng"] }
+zbus = { version = "5.5.0", features = ["tokio"] }
 
 [dependencies.stardust-xr-fusion]
 git = "https://github.com/StardustXR/core.git"
@@ -33,4 +35,8 @@ branch = "dev"
 
 [dependencies.stardust-xr-molecules]
 git = "https://github.com/StardustXR/molecules.git"
+branch = "dev"
+
+[dependencies.asteroids]
+git = "https://github.com/StardustXR/asteroids.git"
 branch = "dev"
