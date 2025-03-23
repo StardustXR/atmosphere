@@ -1,7 +1,6 @@
 mod cli;
 mod config;
 mod env;
-mod play_space_ref;
 
 use crate::cli::*;
 use crate::config::Config;
@@ -9,15 +8,14 @@ use asteroids::{
 	Element,
 	client::ClientState,
 	custom::ElementTrait,
-	elements::{Model, Spatial},
+	elements::{Model, PlaySpace, Spatial},
 	util::Migrate,
 };
 use clap::{Parser, Subcommand};
 use env::{Environment, Node, NodeType};
 use glam::Vec3;
-use play_space_ref::PlaySpace;
 use serde::{Deserialize, Serialize};
-use stardust_xr_fusion::{project_local_resources, spatial::Transform};
+use stardust_xr_fusion::spatial::Transform;
 use std::{
 	fs::DirEntry,
 	path::{Path, PathBuf},

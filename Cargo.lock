@@ -99,7 +99,7 @@ dependencies = [
 [[package]]
 name = "asteroids"
 version = "2.0.0"
-source = "git+https://github.com/StardustXR/asteroids.git?branch=dev#b15fd01d2d087ce98031566bea6c018526ac1b06"
+source = "git+https://github.com/StardustXR/asteroids.git?branch=dev#5364cc4204ae78bf0737eadffd8419d882c739a5"
 dependencies = [
  "convert_case 0.8.0",
  "derive-where",
