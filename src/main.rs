@@ -83,49 +83,45 @@ impl ClientState for State {
 		let env = self
 			.env
 			.get_or_init(|| Environment::load(self.path.join("env.kdl"), &self.path));
-		PlaySpace.with_children([reify_node(&env.root).expect("impossible")])
+		PlaySpace.with_children([reify_node(&env.root)])
 	}
 }
 
-fn reify_node(node: &Node) -> Option<Element<State>> {
+fn reify_node(node: &Node) -> Element<State> {
 	let node_type = &node.node_type;
-	let children = node.children.iter().filter_map(reify_node);
+	let children = node.children.iter().map(reify_node);
 	match node_type {
-		NodeType::Spatial => Some(
-			Spatial::default()
-				.zoneable(true)
-				.transform(node.transform)
-				.with_children(children)
-				.identify(&node.uuid),
-		),
-		NodeType::Model(path_buf) => Some(
-			match Model::direct(path_buf) {
-				Err(err) => {
-					println!(
-						"Error while loading model: {err}, from: {}",
-						path_buf.to_string_lossy()
-					);
-					return None;
-				}
-				Ok(v) => v,
-			}
+		NodeType::Spatial => Spatial::default()
+			.zoneable(true)
 			.transform(node.transform)
 			.with_children(children)
 			.identify(&node.uuid),
-		),
-		NodeType::Box(scale) => Some(
-			Model::namespaced("atmoshpere", "box")
-				.transform({
-					let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
-					Transform {
-						scale: Some(scale.into()),
-						..node.transform
-					}
-				})
-				.with_children(children)
-				.identify(&node.uuid),
-		),
+
+		NodeType::Model(path_buf) => match Model::direct(path_buf) {
+			Err(err) => {
+				println!(
+					"Error while loading model: {err}, from: {}",
+					path_buf.to_string_lossy()
+				);
+				return Spatial::default()
+					.zoneable(true)
+					.transform(node.transform)
+					.with_children(children);
+			}
+			Ok(v) => v.transform(node.transform).with_children(children),
+		},
+
+		NodeType::Box(scale) => Model::namespaced("atmoshpere", "box")
+			.transform({
+				let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
+				Transform {
+					scale: Some(scale.into()),
+					..node.transform
+				}
+			})
+			.with_children(children),
 	}
+	.identify(&node.uuid)
 }
 
 #[tokio::main(flavor = "current_thread")]
