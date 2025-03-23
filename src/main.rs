@@ -111,7 +111,8 @@ fn reify_node(node: &Node) -> Element<State> {
 			Ok(v) => v.transform(node.transform).with_children(children),
 		},
 
-		NodeType::Box(scale) => Model::namespaced("atmoshpere", "box")
+		NodeType::Box(scale) => Spatial::default()
+			.zoneable(true)
 			.transform({
 				let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
 				Transform {
@@ -126,7 +127,7 @@ fn reify_node(node: &Node) -> Element<State> {
 
 #[tokio::main(flavor = "current_thread")]
 async fn show() {
-	asteroids::client::run::<State>(&[&project_local_resources!("res")]).await
+	asteroids::client::run::<State>(&[]).await
 }
 
 #[inline]
