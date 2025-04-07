@@ -8,14 +8,14 @@ use asteroids::{
 	Element,
 	client::ClientState,
 	custom::ElementTrait,
-	elements::{Model, PlaySpace, Spatial},
+	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
 	util::Migrate,
 };
 use clap::{Parser, Subcommand};
 use env::{Environment, Node, NodeType};
 use glam::Vec3;
 use serde::{Deserialize, Serialize};
-use stardust_xr_fusion::spatial::Transform;
+use stardust_xr_fusion::{spatial::Transform, values::ResourceID};
 use std::{
 	fs::DirEntry,
 	path::{Path, PathBuf},
@@ -81,7 +81,20 @@ impl ClientState for State {
 		let env = self
 			.env
 			.get_or_init(|| Environment::load(self.path.join("env.kdl"), &self.path));
-		PlaySpace.with_children([reify_node(&env.root)])
+		let sky_light = env
+			.sky_light
+			.clone()
+			.map(|v| SkyLight(ResourceID::Direct(v)).build());
+		let sky_tex = env
+			.sky_tex
+			.clone()
+			.map(|v| SkyTexture(ResourceID::Direct(v)).build());
+		PlaySpace.with_children(
+			[reify_node(&env.root)]
+				.into_iter()
+				.chain(sky_light)
+				.chain(sky_tex),
+		)
 	}
 }
 

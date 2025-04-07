@@ -42,7 +42,8 @@ impl Environment {
 				"sky" => {
 					let path = node
 						.get("path")
-						.map(|v| v.value().as_string().unwrap().into());
+						.map(|v| v.value().as_string().unwrap().into())
+						.map(|v: PathBuf| env_path.as_ref().join(v));
 					env.sky_tex.clone_from(&path);
 					env.sky_light = path;
 				}
@@ -50,11 +51,13 @@ impl Environment {
 					env.sky_tex = node
 						.get("path")
 						.map(|v| v.value().as_string().unwrap().into())
+						.map(|v: PathBuf| env_path.as_ref().join(v))
 				}
 				"sky_light" => {
 					env.sky_light = node
 						.get("path")
 						.map(|v| v.value().as_string().unwrap().into())
+						.map(|v: PathBuf| env_path.as_ref().join(v))
 				}
 				"root" => env.root = parse_node(node, env_path.as_ref()),
 				_ => panic!("Unknown node type: {}", node.name().value()),

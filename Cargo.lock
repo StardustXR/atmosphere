@@ -99,7 +99,6 @@ dependencies = [
 [[package]]
 name = "asteroids"
 version = "2.0.0"
-source = "git+https://github.com/StardustXR/asteroids.git?branch=dev#5364cc4204ae78bf0737eadffd8419d882c739a5"
 dependencies = [
  "convert_case 0.8.0",
  "derive-where",
@@ -1811,7 +1810,7 @@ checksum = "2f2b15926089e5526bb2dd738a2eb0e59034356e06eb71e1cd912358c0e62c4d"
 [[package]]
 name = "stardust-xr"
 version = "0.45.0"
-source = "git+https://github.com/StardustXR/core.git?branch=dev#a6e08543335d832763fa939ff98a37494f67650c"
+source = "git+https://github.com/StardustXR/core.git?branch=dev#6c7d902ec50b5bad83a1a72ee0cf297d396895dc"
 dependencies = [
  "cluFlock",
  "color-eyre",
@@ -1857,7 +1856,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-fusion"
 version = "0.45.0"
-source = "git+https://github.com/StardustXR/core.git?branch=dev#a6e08543335d832763fa939ff98a37494f67650c"
+source = "git+https://github.com/StardustXR/core.git?branch=dev#6c7d902ec50b5bad83a1a72ee0cf297d396895dc"
 dependencies = [
  "color-eyre",
  "dashmap",
@@ -1879,7 +1878,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-fusion-codegen"
 version = "0.1.0"
-source = "git+https://github.com/StardustXR/core.git?branch=dev#a6e08543335d832763fa939ff98a37494f67650c"
+source = "git+https://github.com/StardustXR/core.git?branch=dev#6c7d902ec50b5bad83a1a72ee0cf297d396895dc"
 dependencies = [
  "convert_case 0.6.0",
  "mint",
@@ -1911,7 +1910,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-schemas"
 version = "1.5.3"
-source = "git+https://github.com/StardustXR/core.git?branch=dev#a6e08543335d832763fa939ff98a37494f67650c"
+source = "git+https://github.com/StardustXR/core.git?branch=dev#6c7d902ec50b5bad83a1a72ee0cf297d396895dc"
 dependencies = [
  "flatbuffers",
  "flexbuffers",
