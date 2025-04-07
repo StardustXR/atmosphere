@@ -61,7 +61,7 @@ impl Migrate for State {
 impl ClientState for State {
 	const QUALIFIER: &'static str = "org";
 	const ORGANIZATION: &'static str = "stardustxr";
-	const NAME: &'static str = "atmoshpere";
+	const NAME: &'static str = "atmosphere";
 
 	fn initial_state_update(&mut self) {
 		if let Commands::Show { env_name } = Cli::parse().command {
