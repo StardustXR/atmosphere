@@ -5,11 +5,9 @@ mod env;
 use crate::cli::*;
 use crate::config::Config;
 use asteroids::{
-	Element,
+	Element, ElementTrait, Migrate,
 	client::ClientState,
-	custom::ElementTrait,
 	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
-	util::Migrate,
 };
 use clap::{Parser, Subcommand};
 use env::{Environment, Node, NodeType};
