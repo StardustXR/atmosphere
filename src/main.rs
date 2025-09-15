@@ -5,7 +5,7 @@ mod env;
 use crate::cli::*;
 use crate::config::Config;
 use asteroids::{
-	Element, ElementTrait, Migrate,
+	CustomElement, Element, Identifiable, Migrate, Reify,
 	client::ClientState,
 	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
 };
@@ -57,9 +57,7 @@ impl Migrate for State {
 	type Old = Self;
 }
 impl ClientState for State {
-	const QUALIFIER: &'static str = "org";
-	const ORGANIZATION: &'static str = "stardustxr";
-	const NAME: &'static str = "atmosphere";
+	const APP_ID: &'static str = "org.stardustxr.atmosphere";
 
 	fn initial_state_update(&mut self) {
 		if let Commands::Show { env_name } = Cli::parse().command {
@@ -74,8 +72,9 @@ impl ClientState for State {
 			println!("somehow ran initial_state_update without using the show command")
 		}
 	}
-
-	fn reify(&self) -> asteroids::Element<Self> {
+}
+impl Reify for State {
+	fn reify(&self) -> impl asteroids::Element<Self> {
 		let env = self
 			.env
 			.get_or_init(|| Environment::load(self.path.join("env.kdl"), &self.path));
@@ -87,24 +86,25 @@ impl ClientState for State {
 			.sky_tex
 			.clone()
 			.map(|v| SkyTexture(ResourceID::Direct(v)).build());
-		PlaySpace.with_children(
-			[reify_node(&env.root)]
-				.into_iter()
-				.chain(sky_light)
-				.chain(sky_tex),
-		)
+		PlaySpace
+			.build()
+			.maybe_child(sky_light)
+			.maybe_child(sky_tex)
+			.child(reify_node(&env.root))
 	}
 }
 
-fn reify_node(node: &Node) -> Element<State> {
+fn reify_node(node: &Node) -> impl Element<State> {
 	let node_type = &node.node_type;
 	let children = node.children.iter().map(reify_node);
 	match node_type {
 		NodeType::Spatial => Spatial::default()
 			.zoneable(true)
 			.transform(node.transform)
-			.with_children(children)
-			.identify(&node.uuid),
+			.build()
+			.identify(&node.uuid)
+			.children(children)
+			.heap(),
 
 		NodeType::Model(path_buf) => match Model::direct(path_buf) {
 			Err(err) => {
@@ -112,12 +112,20 @@ fn reify_node(node: &Node) -> Element<State> {
 					"Error while loading model: {err}, from: {}",
 					path_buf.to_string_lossy()
 				);
-				return Spatial::default()
+				Spatial::default()
 					.zoneable(true)
 					.transform(node.transform)
-					.with_children(children);
+					.build()
+					.identify(&node.uuid)
+					.children(children)
+					.heap()
 			}
-			Ok(v) => v.transform(node.transform).with_children(children),
+			Ok(v) => v
+				.transform(node.transform)
+				.build()
+				.identify(&node.uuid)
+				.children(children)
+				.heap(),
 		},
 
 		NodeType::Box(scale) => Spatial::default()
@@ -129,9 +137,11 @@ fn reify_node(node: &Node) -> Element<State> {
 					..node.transform
 				}
 			})
-			.with_children(children),
+			.build()
+			.children(children)
+			.identify(&node.uuid)
+			.heap(),
 	}
-	.identify(&node.uuid)
 }
 
 #[tokio::main(flavor = "current_thread")]
