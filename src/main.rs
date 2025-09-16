@@ -4,15 +4,15 @@ mod env;
 
 use crate::cli::*;
 use crate::config::Config;
-use asteroids::{
-	CustomElement, Element, Identifiable, Migrate, Reify,
-	client::ClientState,
-	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
-};
 use clap::{Parser, Subcommand};
 use env::{Environment, Node, NodeType};
 use glam::Vec3;
 use serde::{Deserialize, Serialize};
+use stardust_xr_asteroids::{
+	CustomElement, Element, Identifiable, Migrate, Reify,
+	client::ClientState,
+	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
+};
 use stardust_xr_fusion::{spatial::Transform, values::ResourceID};
 use std::{
 	fs::DirEntry,
@@ -74,7 +74,7 @@ impl ClientState for State {
 	}
 }
 impl Reify for State {
-	fn reify(&self) -> impl asteroids::Element<Self> {
+	fn reify(&self) -> impl stardust_xr_asteroids::Element<Self> {
 		let env = self
 			.env
 			.get_or_init(|| Environment::load(self.path.join("env.kdl"), &self.path));
@@ -146,7 +146,7 @@ fn reify_node(node: &Node) -> impl Element<State> {
 
 #[tokio::main(flavor = "current_thread")]
 async fn show() {
-	asteroids::client::run::<State>(&[]).await
+	stardust_xr_asteroids::client::run::<State>(&[]).await
 }
 
 #[inline]
