@@ -9,7 +9,7 @@ use env::{Environment, Node, NodeType};
 use glam::Vec3;
 use serde::{Deserialize, Serialize};
 use stardust_xr_asteroids::{
-	CustomElement, Element, Identifiable, Migrate, Reify,
+	CustomElement, DynamicElement, Element, Migrate, Reify,
 	client::ClientState,
 	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
 };
@@ -19,6 +19,7 @@ use std::{
 	path::{Path, PathBuf},
 	sync::OnceLock,
 };
+use uuid::Uuid;
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None)]
@@ -90,58 +91,57 @@ impl Reify for State {
 			.build()
 			.maybe_child(sky_light)
 			.maybe_child(sky_tex)
-			.child(reify_node(&env.root))
+			.child(reify_node(&env.root).1)
 	}
 }
 
-fn reify_node(node: &Node) -> impl Element<State> {
+fn reify_node(node: &Node) -> (Uuid, DynamicElement<State>) {
 	let node_type = &node.node_type;
 	let children = node.children.iter().map(reify_node);
-	match node_type {
-		NodeType::Spatial => Spatial::default()
-			.zoneable(true)
-			.transform(node.transform)
-			.build()
-			.identify(&node.uuid)
-			.children(children)
-			.heap(),
-
-		NodeType::Model(path_buf) => match Model::direct(path_buf) {
-			Err(err) => {
-				println!(
-					"Error while loading model: {err}, from: {}",
-					path_buf.to_string_lossy()
-				);
-				Spatial::default()
-					.zoneable(true)
-					.transform(node.transform)
-					.build()
-					.identify(&node.uuid)
-					.children(children)
-					.heap()
-			}
-			Ok(v) => v
+	(
+		node.uuid,
+		match node_type {
+			NodeType::Spatial => Spatial::default()
+				.zoneable(true)
 				.transform(node.transform)
 				.build()
-				.identify(&node.uuid)
-				.children(children)
-				.heap(),
-		},
+				.stable_children(children)
+				.dynamic(),
 
-		NodeType::Box(scale) => Spatial::default()
-			.zoneable(true)
-			.transform({
-				let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
-				Transform {
-					scale: Some(scale.into()),
-					..node.transform
+			NodeType::Model(path_buf) => match Model::direct(path_buf) {
+				Err(err) => {
+					println!(
+						"Error while loading model: {err}, from: {}",
+						path_buf.to_string_lossy()
+					);
+					Spatial::default()
+						.zoneable(true)
+						.transform(node.transform)
+						.build()
+						.stable_children(children)
+						.dynamic()
 				}
-			})
-			.build()
-			.children(children)
-			.identify(&node.uuid)
-			.heap(),
-	}
+				Ok(v) => v
+					.transform(node.transform)
+					.build()
+					.stable_children(children)
+					.dynamic(),
+			},
+
+			NodeType::Box(scale) => Spatial::default()
+				.zoneable(true)
+				.transform({
+					let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
+					Transform {
+						scale: Some(scale.into()),
+						..node.transform
+					}
+				})
+				.build()
+				.stable_children(children)
+				.dynamic(),
+		},
+	)
 }
 
 #[tokio::main(flavor = "current_thread")]

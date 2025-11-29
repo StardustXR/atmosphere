@@ -28,15 +28,5 @@ serde_kdl = "0.1.0"
 kdl = "4.6.0"
 uuid = { version = "1.16.0", features = ["v4", "rng"] }
 zbus = { version = "5.5.0", features = ["tokio"] }
-
-[dependencies.stardust-xr-fusion]
-git = "https://github.com/StardustXR/core.git"
-branch = "dev"
-
-[dependencies.stardust-xr-molecules]
-git = "https://github.com/StardustXR/molecules.git"
-branch = "dev"
-
-[dependencies.stardust-xr-asteroids]
-git = "https://github.com/StardustXR/asteroids.git"
-branch = "dev"
+stardust-xr-fusion = "0.50.0"
+stardust-xr-asteroids = "0.50.0"
