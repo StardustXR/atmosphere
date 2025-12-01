@@ -23,6 +23,11 @@ knuffel = "3.2.0"
 serde_kdl = "0.1.0"
 kdl = "4.6.0"
 uuid = { version = "1.16.0", features = ["v4", "rng"] }
-zbus = { version = "5.5.0", features = ["tokio"] }
-stardust-xr-fusion = "0.50.0"
-stardust-xr-asteroids = "0.50.0"
+
+[dependencies.stardust-xr-fusion]
+version = "0.50.0"
+git = "https://github.com/StardustXR/core.git"
+
+[dependencies.stardust-xr-asteroids]
+version = "0.50.0"
+git = "https://github.com/StardustXR/asteroids.git"

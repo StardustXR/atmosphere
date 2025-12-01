@@ -101,9 +101,7 @@ fn reify_node(node: &Node) -> (Uuid, DynamicElement<State>) {
 	(
 		node.uuid,
 		match node_type {
-			NodeType::Spatial => Spatial::default()
-				.zoneable(true)
-				.transform(node.transform)
+			NodeType::Spatial => Spatial(node.transform)
 				.build()
 				.stable_children(children)
 				.dynamic(),
@@ -114,9 +112,7 @@ fn reify_node(node: &Node) -> (Uuid, DynamicElement<State>) {
 						"Error while loading model: {err}, from: {}",
 						path_buf.to_string_lossy()
 					);
-					Spatial::default()
-						.zoneable(true)
-						.transform(node.transform)
+					Spatial(node.transform)
 						.build()
 						.stable_children(children)
 						.dynamic()
@@ -128,18 +124,16 @@ fn reify_node(node: &Node) -> (Uuid, DynamicElement<State>) {
 					.dynamic(),
 			},
 
-			NodeType::Box(scale) => Spatial::default()
-				.zoneable(true)
-				.transform({
-					let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
-					Transform {
-						scale: Some(scale.into()),
-						..node.transform
-					}
-				})
-				.build()
-				.stable_children(children)
-				.dynamic(),
+			NodeType::Box(scale) => Spatial({
+				let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
+				Transform {
+					scale: Some(scale.into()),
+					..node.transform
+				}
+			})
+			.build()
+			.stable_children(children)
+			.dynamic(),
 		},
 	)
 }
