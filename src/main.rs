@@ -9,7 +9,7 @@ use env::{Environment, Node, NodeType};
 use glam::Vec3;
 use serde::{Deserialize, Serialize};
 use stardust_xr_asteroids::{
-	CustomElement, DynamicElement, Element, Migrate, Reify,
+	Context, CustomElement, DynamicElement, Element, Migrate, Reify, Tasker,
 	client::ClientState,
 	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
 };
@@ -75,7 +75,11 @@ impl ClientState for State {
 	}
 }
 impl Reify for State {
-	fn reify(&self) -> impl stardust_xr_asteroids::Element<Self> {
+	fn reify(
+		&self,
+		_context: &Context,
+		_tasks: impl Tasker<Self>,
+	) -> impl stardust_xr_asteroids::Element<Self> {
 		let env = self
 			.env
 			.get_or_init(|| Environment::load(self.path.join("env.kdl"), &self.path));
