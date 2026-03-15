@@ -1297,7 +1297,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07033963ba89ebaf1584d767badaa2e8fcec21aedea6b8c0346d487d49c28667"
 dependencies = [
  "cfg-if",
- "windows-targets 0.48.5",
+ "windows-targets 0.53.3",
 ]
 
 [[package]]
@@ -2123,7 +2123,7 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "stardust-xr-asteroids"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/asteroids.git#50b5f95ad40a150be61ba7e82c90fbc56d1e6c2c"
+source = "git+https://github.com/StardustXR/asteroids.git#82e6d5f713beadc6fc8cf25a0717256838885111"
 dependencies = [
  "bumpalo",
  "derive-where",
@@ -2166,8 +2166,8 @@ dependencies = [
 
 [[package]]
 name = "stardust-xr-fusion"
-version = "0.51.0"
-source = "git+https://github.com/StardustXR/core.git#e7ce3bc3962c563967dfad6b00e1fb290f11eeb7"
+version = "0.51.1"
+source = "git+https://github.com/StardustXR/core.git#3ffb5dfa2f4fdda03f8bb860fb44fade1151b4ff"
 dependencies = [
  "color-eyre",
  "convert_case",
@@ -2192,8 +2192,8 @@ dependencies = [
 
 [[package]]
 name = "stardust-xr-gluon"
-version = "0.51.0"
-source = "git+https://github.com/StardustXR/core.git#e7ce3bc3962c563967dfad6b00e1fb290f11eeb7"
+version = "0.51.1"
+source = "git+https://github.com/StardustXR/core.git#3ffb5dfa2f4fdda03f8bb860fb44fade1151b4ff"
 dependencies = [
  "futures",
  "nanoid",
@@ -2223,8 +2223,8 @@ dependencies = [
 
 [[package]]
 name = "stardust-xr-protocol"
-version = "0.51.0"
-source = "git+https://github.com/StardustXR/core.git#e7ce3bc3962c563967dfad6b00e1fb290f11eeb7"
+version = "0.51.1"
+source = "git+https://github.com/StardustXR/core.git#3ffb5dfa2f4fdda03f8bb860fb44fade1151b4ff"
 dependencies = [
  "fnv",
  "kdl",
@@ -2233,8 +2233,8 @@ dependencies = [
 
 [[package]]
 name = "stardust-xr-wire"
-version = "0.51.0"
-source = "git+https://github.com/StardustXR/core.git#e7ce3bc3962c563967dfad6b00e1fb290f11eeb7"
+version = "0.51.1"
+source = "git+https://github.com/StardustXR/core.git#3ffb5dfa2f4fdda03f8bb860fb44fade1151b4ff"
 dependencies = [
  "dirs 6.0.0",
  "flatbuffers",
