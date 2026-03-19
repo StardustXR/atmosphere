@@ -11,7 +11,7 @@ Or if you installed via the [installation script](https://github.com/cyberneticm
 
 ## How To Use
 ```sh
-atmosphere install default_envs/the_grid # or any other folder with an env.kdl file inside it
+atmosphere install data/xr_environments/the_grid # or any other folder with an env.kdl file inside it
 atmosphere set-default the_grid
 atmosphere show # the_grid implied since set to default
 ```

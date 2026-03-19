@@ -58,7 +58,7 @@ impl Migrate for State {
 	type Old = Self;
 }
 impl ClientState for State {
-	const APP_ID: &'static str = "org.stardustxr.atmosphere";
+	const APP_ID: &'static str = "org.stardustxr.Atmosphere";
 
 	fn initial_state_update(&mut self) {
 		if let Commands::Show { env_name } = Cli::parse().command {
