@@ -4,10 +4,17 @@ desktop-src := appid + '.desktop'
 desktop-dst := install-dir / 'applications' / desktop-src
 metainfo-src := appid + '.metainfo.xml'
 metainfo-dst := install-dir / 'metainfo' / metainfo-src
+env-src := 'xr_environments'
+env-dst := install-dir / 'xr_environments'
 
 install:
     install -Dm0644 {{ desktop-src }} {{ desktop-dst }}
     install -Dm0644 {{ metainfo-src }} {{ metainfo-dst }}
+    install -Dm0644 {{ env-src }}/the_grid/env.kdl {{ env-dst }}/the_grid/env.kdl
+    install -Dm0644 {{ env-src }}/the_grid/grid.png {{ env-dst }}/the_grid/grid.png
+    install -Dm0644 {{ env-src }}/the_grid/grid_floor.glb {{ env-dst }}/the_grid/grid_floor.glb
+    install -Dm0644 {{ env-src }}/the_grid/grid_sky.hdr {{ env-dst }}/the_grid/grid_sky.hdr
+    install -Dm0644 {{ env-src }}/the_grid/grid_sky.png {{ env-dst }}/the_grid/grid_sky.png
 
 uninstall:
-    rm -r {{ desktop-dst }} {{ metainfo-dst }}
+    rm -r {{ desktop-dst }} {{ metainfo-dst }} {{ env-dst }}/the_grid
