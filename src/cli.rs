@@ -44,7 +44,7 @@ pub fn list() {
 		}
 		println!(
 			"    └ {}",
-			ansi_term::Color::Black
+			ansi_term::Color::White
 				.dimmed()
 				.paint(dir.path().to_string_lossy())
 		);
