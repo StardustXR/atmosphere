@@ -14,12 +14,9 @@ use stardust_xr_asteroids::{
 	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
 };
 use stardust_xr_fusion::{spatial::Transform, values::ResourceID};
-use std::{
-	fs::DirEntry,
-	path::{Path, PathBuf},
-	sync::OnceLock,
-};
+use std::{collections::HashMap, fs::DirEntry, path::PathBuf, sync::OnceLock};
 use uuid::Uuid;
+use xdg::BaseDirectories;
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None)]
@@ -63,12 +60,15 @@ impl ClientState for State {
 	fn initial_state_update(&mut self) {
 		if let Commands::Show { env_name } = Cli::parse().command {
 			let config: Config = confy::load("atmosphere", "atmosphere").unwrap();
-			let env_path = env_name
-				.as_ref()
-				.map(Path::new)
-				.unwrap_or(&config.environment);
-			let data_path = environments_dir().join(env_path);
-			self.path = data_path;
+
+			self.path = if let Some(env_name) = env_name {
+				valid_environments()
+					.get(&env_name)
+					.map(DirEntry::path)
+					.unwrap_or(config.environment)
+			} else {
+				config.environment
+			};
 		} else {
 			println!("somehow ran initial_state_update without using the show command")
 		}
@@ -148,20 +148,23 @@ async fn show() {
 }
 
 #[inline]
-pub fn environments_dir() -> PathBuf {
-	let dir = dirs::data_local_dir().unwrap().join("xr_environments");
-	if !dir.exists() {
-		let _ = std::fs::create_dir_all(&dir);
+pub fn environment_dirs() -> Vec<PathBuf> {
+	let basedirs = BaseDirectories::with_prefix("xr_environments");
+	let mut data_dirs = basedirs.get_data_dirs();
+	if let Some(data_home) = basedirs.get_data_home() {
+		data_dirs.push(data_home);
 	}
-	dir
+	data_dirs
 }
 
-pub fn get_list() -> Vec<DirEntry> {
-	environments_dir()
-		.read_dir()
-		.unwrap()
-		.filter_map(|dir| dir.ok())
-		.filter(|dir| !dir.file_type().unwrap().is_file())
-		// .filter(|dir| dir.path().join("env.kdl").exists())
-		.collect::<Vec<_>>()
+pub fn valid_environments() -> HashMap<String, DirEntry> {
+	environment_dirs()
+		.into_iter()
+		.rev()
+		.filter_map(|d| d.read_dir().ok())
+		.flatten()
+		.filter_map(|env| env.ok())
+		.filter(|env| !env.file_type().unwrap().is_file())
+		.map(|env| (env.file_name().to_string_lossy().to_string(), env))
+		.collect()
 }

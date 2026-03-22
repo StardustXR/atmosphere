@@ -35,6 +35,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ansi_term"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d52a9bb7ec0cf484c551830a7ce27bd20d67eac647e1befb56b0be4ee39a55d2"
+dependencies = [
+ "winapi",
+]
+
+[[package]]
 name = "anstream"
 version = "0.6.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1297,7 +1306,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07033963ba89ebaf1584d767badaa2e8fcec21aedea6b8c0346d487d49c28667"
 dependencies = [
  "cfg-if",
- "windows-targets 0.53.3",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -2123,7 +2132,7 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "stardust-xr-asteroids"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/asteroids.git#82e6d5f713beadc6fc8cf25a0717256838885111"
+source = "git+https://github.com/StardustXR/asteroids.git#5d0ff56a8a3a9581c1bb005b65d7746ef0577921"
 dependencies = [
  "bumpalo",
  "derive-where",
@@ -2151,6 +2160,7 @@ dependencies = [
 name = "stardust-xr-atmosphere"
 version = "0.51.0"
 dependencies = [
+ "ansi_term",
  "clap",
  "confy",
  "copy_dir",
@@ -2162,6 +2172,7 @@ dependencies = [
  "stardust-xr-fusion",
  "tokio",
  "uuid",
+ "xdg",
 ]
 
 [[package]]
@@ -3099,6 +3110,12 @@ name = "writeable"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea2f10b9bb0928dfb1b42b65e1f9e36f7f54dbdf08457afefb38afcdec4fa2bb"
+
+[[package]]
+name = "xdg"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fb433233f2df9344722454bc7e96465c9d03bff9d77c248f9e7523fe79585b5"
 
 [[package]]
 name = "yansi"
