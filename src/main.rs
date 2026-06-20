@@ -11,9 +11,9 @@ use serde::{Deserialize, Serialize};
 use stardust_xr_asteroids::{
 	Context, CustomElement, DynamicElement, Element, Migrate, Reify, Tasker,
 	client::ClientState,
-	elements::{Model, PlaySpace, SkyLight, SkyTexture, Spatial},
+	elements::{Model, SkyLight, SkyTex, Spatial, StageSpace},
 };
-use stardust_xr_fusion::{spatial::Transform, values::ResourceID};
+use stardust_xr_fusion::{spatial::Transform, types::Resource};
 use std::{collections::HashMap, fs::DirEntry, path::PathBuf, sync::OnceLock};
 use uuid::Uuid;
 use xdg::BaseDirectories;
@@ -83,15 +83,22 @@ impl Reify for State {
 		let env = self
 			.env
 			.get_or_init(|| Environment::load(self.path.join("env.kdl"), &self.path));
-		let sky_light = env
-			.sky_light
-			.clone()
-			.map(|v| SkyLight(ResourceID::Direct(v)).build());
-		let sky_tex = env
-			.sky_tex
-			.clone()
-			.map(|v| SkyTexture(ResourceID::Direct(v)).build());
-		PlaySpace
+		let sky_light = env.sky_light.clone().map(|v| {
+			SkyLight(Resource::Direct {
+				path: v.to_string_lossy().to_string(),
+			})
+			.build()
+		});
+		let sky_tex = env.sky_tex.clone().map(|v| {
+			SkyTex {
+				resource: Resource::Direct {
+					path: v.to_string_lossy().to_string(),
+				},
+				opaque: true,
+			}
+			.build()
+		});
+		StageSpace
 			.build()
 			.maybe_child(sky_light)
 			.maybe_child(sky_tex)
@@ -129,9 +136,9 @@ fn reify_node(node: &Node) -> (Uuid, DynamicElement<State>) {
 			},
 
 			NodeType::Box(scale) => Spatial({
-				let scale = node.transform.scale.map(Vec3::from).unwrap_or(Vec3::ONE) * *scale;
+				let scale = Vec3::from(node.transform.scale) * *scale;
 				Transform {
-					scale: Some(scale.into()),
+					scale: scale.into(),
 					..node.transform
 				}
 			})
@@ -144,7 +151,9 @@ fn reify_node(node: &Node) -> (Uuid, DynamicElement<State>) {
 
 #[tokio::main(flavor = "current_thread")]
 async fn show() {
-	stardust_xr_asteroids::client::run::<State>(&[]).await
+	stardust_xr_asteroids::client::run::<State>(&[])
+		.await
+		.unwrap();
 }
 
 #[inline]

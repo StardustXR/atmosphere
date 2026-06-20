@@ -27,7 +27,9 @@ ansi_term = "0.12.1"
 [dependencies.stardust-xr-fusion]
 version = "0.51.0"
 git = "https://github.com/StardustXR/core.git"
+branch = "binder"
 
 [dependencies.stardust-xr-asteroids]
 version = "0.51.0"
 git = "https://github.com/StardustXR/asteroids.git"
+branch = "binder"

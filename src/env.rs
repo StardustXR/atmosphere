@@ -31,7 +31,7 @@ impl Environment {
 			sky_light: None,
 			root: Node {
 				uuid: Uuid::new_v4(),
-				transform: Transform::none(),
+				transform: Transform::IDENTITY,
 				children: Vec::new(),
 				node_type: NodeType::Spatial,
 			},
@@ -167,9 +167,9 @@ fn parse_node(node: &KdlNode, env_path: &Path) -> Node {
 	Node {
 		uuid: Uuid::new_v4(),
 		transform: Transform {
-			translation: translation.map(Into::into),
-			rotation: rotation.map(Into::into),
-			scale: scale.map(Into::into),
+			translation: translation.unwrap_or(Vec3::ZERO).into(),
+			rotation: rotation.unwrap_or(Quat::IDENTITY).into(),
+			scale: scale.unwrap_or(Vec3::ONE).into(),
 		},
 		children,
 		node_type,
