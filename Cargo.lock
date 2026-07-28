@@ -254,13 +254,14 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "binderbinder"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/binderbinder#bc67300889b264553697fd5d720a929c21571954"
+source = "git+https://github.com/technobaboo/binderbinder#9615b9853227406f463f47e5ff8d3bc853cbb5cb"
 dependencies = [
  "bitflags",
  "dashmap",
  "rustix",
  "thiserror 2.0.18",
  "tokio",
+ "tokio-util",
  "tracing",
  "tracing-subscriber",
 ]
@@ -941,7 +942,7 @@ dependencies = [
 [[package]]
 name = "gluon"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
+source = "git+https://github.com/technobaboo/gluon#8d072d7393cd038ea6ddd9251858d3776b4c1472"
 dependencies = [
  "binderbinder",
  "bitflags",
@@ -954,7 +955,7 @@ dependencies = [
 [[package]]
 name = "gluon-codegen"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
+source = "git+https://github.com/technobaboo/gluon#8d072d7393cd038ea6ddd9251858d3776b4c1472"
 dependencies = [
  "convert_case",
  "gluon",
@@ -968,7 +969,7 @@ dependencies = [
 [[package]]
 name = "gluon-derive"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
+source = "git+https://github.com/technobaboo/gluon#8d072d7393cd038ea6ddd9251858d3776b4c1472"
 dependencies = [
  "quote",
  "syn",
@@ -977,7 +978,7 @@ dependencies = [
 [[package]]
 name = "gluon-parser"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
+source = "git+https://github.com/technobaboo/gluon#8d072d7393cd038ea6ddd9251858d3776b4c1472"
 dependencies = [
  "ansi_term",
  "chumsky",
@@ -1147,7 +1148,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07033963ba89ebaf1584d767badaa2e8fcec21aedea6b8c0346d487d49c28667"
 dependencies = [
  "cfg-if",
- "windows-targets 0.53.3",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -1870,7 +1871,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-asteroids"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/asteroids.git?branch=binder#c3a7740854d447597b1065410e9d95493747612e"
+source = "git+https://github.com/StardustXR/asteroids.git?branch=binder#275f8617aee8630dd482cf0449a392109b51dd03"
 dependencies = [
  "bumpalo",
  "derive-where",
@@ -1917,12 +1918,13 @@ dependencies = [
 [[package]]
 name = "stardust-xr-fusion"
 version = "0.51.1"
-source = "git+https://github.com/StardustXR/core.git?branch=binder#bdf8ce105f5f1c0404ab375f93fd9c720a078ea7"
+source = "git+https://github.com/StardustXR/core.git?branch=binder#8728d740f6280d6777cfd0f2ec56fc55b3d17b2f"
 dependencies = [
  "glam 0.30.5",
  "gluon",
  "parking_lot",
  "pion-binder",
+ "rustix",
  "stardust-xr-protocol",
  "thiserror 2.0.18",
  "tokio",
@@ -1933,7 +1935,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-molecules"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/molecules.git?branch=binder#7b6aec6cd965a81cab254033d3d7dee265a67424"
+source = "git+https://github.com/StardustXR/molecules.git?branch=binder#29c94bf97f47a8dd43f5d39ede297623b962281e"
 dependencies = [
  "futures",
  "glam 0.29.3",
@@ -1954,7 +1956,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-molecules-protocols"
 version = "0.1.0"
-source = "git+https://github.com/StardustXR/molecules.git?branch=binder#7b6aec6cd965a81cab254033d3d7dee265a67424"
+source = "git+https://github.com/StardustXR/molecules.git?branch=binder#29c94bf97f47a8dd43f5d39ede297623b962281e"
 dependencies = [
  "gluon",
  "gluon-codegen",
@@ -1965,7 +1967,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-protocol"
 version = "0.51.1"
-source = "git+https://github.com/StardustXR/core.git?branch=binder#bdf8ce105f5f1c0404ab375f93fd9c720a078ea7"
+source = "git+https://github.com/StardustXR/core.git?branch=binder#8728d740f6280d6777cfd0f2ec56fc55b3d17b2f"
 dependencies = [
  "fnv",
  "glam 0.29.3",
@@ -2132,6 +2134,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32da49809aab5c3bc678af03902d4ccddea2a87d028d86392a4b1560c6906c70"
 dependencies = [
  "futures-core",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
+name = "tokio-util"
+version = "0.7.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "494815d09bf52b5548659851081238f0ca39ff638363907596da739561c62c52"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "futures-sink",
  "pin-project-lite",
  "tokio",
 ]
