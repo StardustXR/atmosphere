@@ -9,11 +9,12 @@ use env::{Environment, Node, NodeType};
 use glam::Vec3;
 use serde::{Deserialize, Serialize};
 use stardust_xr_asteroids::{
-	Context, CustomElement, DynamicElement, Element, Migrate, Reify, Tasker,
+	Context, CustomElement, DynamicElement, Element, Entity, Migrate, Reify, Tasker,
 	client::ClientState,
+	components::Reparentable,
 	elements::{Model, SkyLight, SkyTex, Spatial, StageSpace},
 };
-use stardust_xr_fusion::{spatial::Transform, types::Resource};
+use stardust_xr_fusion::{fields::Shape, spatial::Transform, types::Resource};
 use std::{collections::HashMap, fs::DirEntry, path::PathBuf, sync::OnceLock};
 use uuid::Uuid;
 use xdg::BaseDirectories;
@@ -98,11 +99,14 @@ impl Reify for State {
 			}
 			.build()
 		});
-		StageSpace
-			.build()
-			.maybe_child(sky_light)
-			.maybe_child(sky_tex)
-			.child(reify_node(&env.root).1)
+		StageSpace.build().child(
+			Entity::new(Shape::Sphere { radius: 0.01 })
+				.component(Reparentable::default())
+				.build()
+				.maybe_child(sky_light)
+				.maybe_child(sky_tex)
+				.child(reify_node(&env.root).1),
+		)
 	}
 }
 
