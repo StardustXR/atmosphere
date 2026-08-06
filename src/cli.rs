@@ -52,18 +52,20 @@ pub fn list() {
 }
 
 pub fn install(path: PathBuf) {
-	let Some(environment_dir) = dirs::data_local_dir() else {
-		panic!("Could not find a suitable data directory for environments.");
-	};
+	let environment_dir =
+		dirs::data_local_dir().expect("Could not find a suitable data directory for environments.");
 	if !path.join("env.kdl").exists() {
 		panic!("{} does not contain an env.kdl file!", path.display());
 	}
 
-	let dest_path = environment_dir.join(path.file_name().unwrap());
-	copy_dir(path, &dest_path).unwrap();
+	let env_name = path
+		.file_name()
+		.expect("Could not get the name of the environment to install");
+	let dest_path = environment_dir.join("xr_environments").join(env_name);
+	copy_dir(&path, &dest_path).unwrap();
 	println!(
 		"Installed environment {} to {}",
-		dest_path.file_name().unwrap().to_string_lossy(),
+		env_name.display(),
 		dest_path.display()
 	);
 }
