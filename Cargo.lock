@@ -252,21 +252,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
-name = "binderbinder"
-version = "0.1.0"
-source = "git+https://github.com/technobaboo/binderbinder#9615b9853227406f463f47e5ff8d3bc853cbb5cb"
-dependencies = [
- "bitflags",
- "dashmap",
- "rustix",
- "thiserror 2.0.18",
- "tokio",
- "tokio-util",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "bitflags"
 version = "2.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -338,7 +323,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ba4a05c9ce83b07de31b31c874e87c069881ac4355db9e752e3a55c11ec75a6"
 dependencies = [
  "hashbrown 0.15.5",
- "regex-automata 0.3.9",
+ "regex-automata",
  "serde",
  "stacker",
  "unicode-ident",
@@ -942,12 +927,12 @@ dependencies = [
 [[package]]
 name = "gluon"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#adbc0afb10a576b3862b73a7b94ff44b978caf29"
+source = "git+https://github.com/technobaboo/gluon.git?branch=refactor%2Fstrongipc#44b59852e66e65eea6945d7f82a85d8db39600e5"
 dependencies = [
- "binderbinder",
  "bitflags",
  "gluon-derive",
  "rustix",
+ "strong-ipc",
  "thiserror 2.0.18",
  "tokio",
 ]
@@ -955,7 +940,7 @@ dependencies = [
 [[package]]
 name = "gluon-codegen"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#adbc0afb10a576b3862b73a7b94ff44b978caf29"
+source = "git+https://github.com/technobaboo/gluon.git?branch=refactor%2Fstrongipc#44b59852e66e65eea6945d7f82a85d8db39600e5"
 dependencies = [
  "convert_case",
  "gluon",
@@ -969,7 +954,7 @@ dependencies = [
 [[package]]
 name = "gluon-derive"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#adbc0afb10a576b3862b73a7b94ff44b978caf29"
+source = "git+https://github.com/technobaboo/gluon.git?branch=refactor%2Fstrongipc#44b59852e66e65eea6945d7f82a85d8db39600e5"
 dependencies = [
  "quote",
  "syn",
@@ -978,7 +963,7 @@ dependencies = [
 [[package]]
 name = "gluon-parser"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#adbc0afb10a576b3862b73a7b94ff44b978caf29"
+source = "git+https://github.com/technobaboo/gluon.git?branch=refactor%2Fstrongipc#44b59852e66e65eea6945d7f82a85d8db39600e5"
 dependencies = [
  "ansi_term",
  "chumsky",
@@ -1148,7 +1133,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07033963ba89ebaf1584d767badaa2e8fcec21aedea6b8c0346d487d49c28667"
 dependencies = [
  "cfg-if",
- "windows-targets 0.48.5",
+ "windows-targets 0.53.3",
 ]
 
 [[package]]
@@ -1196,15 +1181,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bffa558d7f51b549670be5ff6db164cd9be428c035cbf4e3f782db3da66845a5"
 dependencies = [
  "num-traits",
-]
-
-[[package]]
-name = "matchers"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1525a2a28c7f4fa0fc98bb91ae755d1e2d1505079e05539e35bc876b5d65ae9"
-dependencies = [
- "regex-automata 0.4.14",
 ]
 
 [[package]]
@@ -1310,15 +1286,6 @@ checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
-]
-
-[[package]]
-name = "nu-ansi-term"
-version = "0.50.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
-dependencies = [
- "windows-sys 0.61.0",
 ]
 
 [[package]]
@@ -1445,19 +1412,6 @@ name = "pin-project-lite"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b3cff922bd51709b605d9ead9aa71031d81447142d828eb4a6eba76fe619f9b"
-
-[[package]]
-name = "pion-binder"
-version = "0.1.0"
-source = "git+https://github.com/technobaboo/pion#c11a613d26a493e0da8a1e82ea4c06c350a10a59"
-dependencies = [
- "async-trait",
- "binderbinder",
- "dashmap",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
 
 [[package]]
 name = "piper"
@@ -1627,18 +1581,7 @@ checksum = "59b23e92ee4318893fa3fe3e6fb365258efbfe6ac6ab30f090cdcbb7aa37efa9"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax 0.7.5",
-]
-
-[[package]]
-name = "regex-automata"
-version = "0.4.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e1dd4122fc1595e8162618945476892eefca7b88c52820e74af6262213cae8f"
-dependencies = [
- "aho-corasick",
- "memchr",
- "regex-syntax 0.8.11",
+ "regex-syntax",
 ]
 
 [[package]]
@@ -1646,12 +1589,6 @@ name = "regex-syntax"
 version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dbb5fb1acd8a1a18b3dd5be62d25485eb770e05afb408a9627d14d451bae12da"
-
-[[package]]
-name = "regex-syntax"
-version = "0.8.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
 name = "ron"
@@ -1787,15 +1724,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sharded-slab"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
-dependencies = [
- "lazy_static",
-]
-
-[[package]]
 name = "shiva-color-rs"
 version = "0.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1841,9 +1769,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.15.1"
+version = "1.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
 
 [[package]]
 name = "socket2"
@@ -1871,7 +1799,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-asteroids"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/asteroids.git?branch=binder#275f8617aee8630dd482cf0449a392109b51dd03"
+source = "git+https://github.com/StardustXR/asteroids.git?branch=refactor%2Fstrongipc#16d5bf860906ccbd0c8416520143d0ac52efaeb8"
 dependencies = [
  "bumpalo",
  "derive-where",
@@ -1918,12 +1846,11 @@ dependencies = [
 [[package]]
 name = "stardust-xr-fusion"
 version = "0.51.1"
-source = "git+https://github.com/StardustXR/core.git?branch=binder#b27ddc08ea61b914f393850dbe845cc1b814dbf4"
+source = "git+https://github.com/StardustXR/core.git?branch=refactor%2Fstrongipc#a0b089e6473172789130ae8124d251c385465225"
 dependencies = [
  "glam 0.30.5",
  "gluon",
  "parking_lot",
- "pion-binder",
  "rustix",
  "stardust-xr-protocol",
  "thiserror 2.0.18",
@@ -1935,14 +1862,13 @@ dependencies = [
 [[package]]
 name = "stardust-xr-molecules"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/molecules.git?branch=binder#a2a934ac79eb17d2103eec9f834e058f5db54470"
+source = "git+https://github.com/StardustXR/molecules.git?branch=refactor%2Fstrongipc#239f75e99ccc0adf0a64d7f4b665060614f71619"
 dependencies = [
  "futures",
  "glam 0.29.3",
  "gluon",
  "lazy_static",
  "lerp",
- "pion-binder",
  "rustc-hash",
  "serde",
  "shiva-color-rs",
@@ -1957,7 +1883,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-molecules-protocols"
 version = "0.1.0"
-source = "git+https://github.com/StardustXR/molecules.git?branch=binder#a2a934ac79eb17d2103eec9f834e058f5db54470"
+source = "git+https://github.com/StardustXR/molecules.git?branch=refactor%2Fstrongipc#239f75e99ccc0adf0a64d7f4b665060614f71619"
 dependencies = [
  "gluon",
  "gluon-codegen",
@@ -1968,7 +1894,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-protocol"
 version = "0.51.1"
-source = "git+https://github.com/StardustXR/core.git?branch=binder#b27ddc08ea61b914f393850dbe845cc1b814dbf4"
+source = "git+https://github.com/StardustXR/core.git?branch=refactor%2Fstrongipc#a0b089e6473172789130ae8124d251c385465225"
 dependencies = [
  "fnv",
  "glam 0.29.3",
@@ -1991,6 +1917,18 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "strong-ipc"
+version = "0.1.0"
+source = "git+https://github.com/technobaboo/strong-ipc#8e49d35b1625e35db0769635a2d14bf1a6e9741a"
+dependencies = [
+ "dashmap",
+ "rustix",
+ "smallvec",
+ "tokio",
+ "tokio-util",
+]
 
 [[package]]
 name = "strsim"
@@ -2091,19 +2029,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "thread_local"
-version = "1.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f60246a4944f24f6e018aa17cdeffb7818b76356965d03b07d6a9886e8962185"
-dependencies = [
- "cfg-if",
-]
-
-[[package]]
 name = "tokio"
-version = "1.52.3"
+version = "1.53.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fc7f01b389ac15039e4dc9531aa973a135d7a4135281b12d7c1bc79fd57fffe"
+checksum = "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
 dependencies = [
  "bytes",
  "libc",
@@ -2148,6 +2077,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-sink",
+ "futures-util",
  "pin-project-lite",
  "tokio",
 ]
@@ -2222,36 +2152,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
 dependencies = [
  "once_cell",
- "valuable",
-]
-
-[[package]]
-name = "tracing-log"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
-dependencies = [
- "log",
- "once_cell",
- "tracing-core",
-]
-
-[[package]]
-name = "tracing-subscriber"
-version = "0.3.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb7f578e5945fb242538965c2d0b04418d38ec25c79d160cd279bf0731c8d319"
-dependencies = [
- "matchers",
- "nu-ansi-term",
- "once_cell",
- "regex-automata 0.4.14",
- "sharded-slab",
- "smallvec",
- "thread_local",
- "tracing",
- "tracing-core",
- "tracing-log",
 ]
 
 [[package]]
@@ -2334,12 +2234,6 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
 ]
-
-[[package]]
-name = "valuable"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
 
 [[package]]
 name = "version_check"
