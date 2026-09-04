@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use stardust_xr_asteroids::{
 	Context, CustomElement, DynamicElement, Element, Entity, Migrate, Reify, Tasker, Transformable,
 	client::ClientState,
-	components::Poseable,
+	components::{Container, Poseable},
 	elements::{Model, SkyLight, SkyTex, Spatial, StageSpace},
 };
 use stardust_xr_fusion::{
@@ -105,12 +105,13 @@ impl Reify for State {
 			.build()
 		});
 		StageSpace.build().child(
-			Entity::new(Shape::Sphere { radius: 0.01 })
+			Entity::new(Shape::Sphere { radius: 1000000.0 })
 				.pose(self.offset)
 				.component(Poseable::new(|state: &mut Self, pose| {
 					state.offset = pose;
 				}))
 				.component(stardust_xr_asteroids::components::Environment)
+				.component(Container)
 				.build()
 				.maybe_child(sky_light)
 				.maybe_child(sky_tex)
