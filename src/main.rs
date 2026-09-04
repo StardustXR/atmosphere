@@ -9,12 +9,16 @@ use env::{Environment, Node, NodeType};
 use glam::Vec3;
 use serde::{Deserialize, Serialize};
 use stardust_xr_asteroids::{
-	Context, CustomElement, DynamicElement, Element, Entity, Migrate, Reify, Tasker,
+	Context, CustomElement, DynamicElement, Element, Entity, Migrate, Reify, Tasker, Transformable,
 	client::ClientState,
-	components::Reparentable,
+	components::Poseable,
 	elements::{Model, SkyLight, SkyTex, Spatial, StageSpace},
 };
-use stardust_xr_fusion::{fields::Shape, spatial::Transform, types::Resource};
+use stardust_xr_fusion::{
+	fields::Shape,
+	spatial::Transform,
+	types::{Posef, Resource},
+};
 use std::{collections::HashMap, fs::DirEntry, path::PathBuf, sync::OnceLock};
 use uuid::Uuid;
 use xdg::BaseDirectories;
@@ -46,8 +50,9 @@ fn main() {
 	}
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct State {
+	offset: Posef,
 	path: PathBuf,
 	#[serde(skip)]
 	env: OnceLock<Environment>,
@@ -101,7 +106,11 @@ impl Reify for State {
 		});
 		StageSpace.build().child(
 			Entity::new(Shape::Sphere { radius: 0.01 })
-				.component(Reparentable::default())
+				.pose(self.offset)
+				.component(Poseable::new(|state: &mut Self, pose| {
+					state.offset = pose;
+				}))
+				.component(stardust_xr_asteroids::components::Environment)
 				.build()
 				.maybe_child(sky_light)
 				.maybe_child(sky_tex)
