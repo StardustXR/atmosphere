@@ -1,4 +1,4 @@
-use crate::{config::Config, valid_environments};
+use crate::{config::Config, get_home_environment_dir, valid_environments};
 use copy_dir::copy_dir;
 use std::path::PathBuf;
 
@@ -52,7 +52,7 @@ pub fn list() {
 }
 
 pub fn install(path: PathBuf) {
-	let Some(environment_dir) = dirs::data_local_dir() else {
+	let Some(environment_dir) = get_home_environment_dir() else {
 		panic!("Could not find a suitable data directory for environments.");
 	};
 	if !path.join("env.kdl").exists() {

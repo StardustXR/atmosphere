@@ -179,6 +179,9 @@ pub fn environment_dirs() -> Vec<PathBuf> {
 	}
 	data_dirs
 }
+pub fn get_home_environment_dir() -> Option<PathBuf> {
+	 BaseDirectories::with_prefix("xr_environments").get_data_home()
+}
 
 pub fn valid_environments() -> HashMap<String, DirEntry> {
 	environment_dirs()
