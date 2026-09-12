@@ -1,6 +1,6 @@
 [package]
 name = "stardust-xr-atmosphere"
-version = "0.51.0"
+version = "0.52.0"
 edition = "2024"
 description = "Stardust XR's reference environment/homespace client"
 authors = ["Nova King <technobaboo@proton.me>"]
@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 tokio = { version = "1.38.0", features = ["full"] }
-glam = { version = "0.28.0", features = ["mint", "serde"] }
+glam = { version = "0.33.7", features = ["mint", "serde"] }
 confy = "0.6.1"
 serde = { version = "1.0.203", features = ["derive"] }
 clap = { version = "4.5.7", features = ["derive"] }
@@ -24,11 +24,9 @@ xdg = "3.0.0"
 ansi_term = "0.12.1"
 
 [dependencies.stardust-xr-fusion]
-version = "0.51.0"
-git = "https://github.com/StardustXR/core.git"
-branch = "refactor/strongipc"
+version = "0.52.0"
+# git = "https://github.com/StardustXR/core.git"
 
 [dependencies.stardust-xr-asteroids]
-version = "0.51.0"
-git = "https://github.com/StardustXR/asteroids.git"
-branch = "refactor/strongipc"
+version = "0.52.0"
+# git = "https://github.com/StardustXR/asteroids.git"
