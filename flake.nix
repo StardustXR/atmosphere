@@ -1,10 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    crane = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:ipetkov/crane";
-    };
+    crane.url = "github:ipetkov/crane";
   };
 
 
@@ -16,6 +13,14 @@
     packages = forAllSystems (system: let pkgs = nixpkgsFor.${system}; craneLib = crane.mkLib pkgs; in {
       default = craneLib.buildPackage {
         src = ./.;
+        cargoLock = ./Cargo.lock;
+
+        STARDUST_RES_PREFIXES = pkgs.stdenvNoCC.mkDerivation {
+          name = "data";
+          src = ./.;
+
+          buildPhase = "cp -r $src/data $out";
+        };
       };
     });
 
