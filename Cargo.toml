@@ -1,6 +1,6 @@
 [package]
 name = "stardust-xr-atmosphere"
-version = "0.52.0"
+version = "0.53.0-rc.1"
 edition = "2024"
 description = "Stardust XR's reference environment/homespace client"
 authors = ["Nova King <technobaboo@proton.me>"]
@@ -24,9 +24,9 @@ xdg = "3.0.0"
 ansi_term = "0.12.1"
 
 [dependencies.stardust-xr-fusion]
-version = "0.52.0"
+version = "0.53.0-rc.1"
 # git = "https://github.com/StardustXR/core.git"
 
 [dependencies.stardust-xr-asteroids]
-version = "0.52.0"
+version = "0.53.0-rc.1"
 # git = "https://github.com/StardustXR/asteroids.git"

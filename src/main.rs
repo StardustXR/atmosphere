@@ -85,6 +85,7 @@ impl Reify for State {
 		&self,
 		_context: &Context,
 		_tasks: impl Tasker<Self>,
+		_props: (),
 	) -> impl stardust_xr_asteroids::Element<Self> {
 		let env = self
 			.env
@@ -180,7 +181,7 @@ pub fn environment_dirs() -> Vec<PathBuf> {
 	data_dirs
 }
 pub fn get_home_environment_dir() -> Option<PathBuf> {
-	 BaseDirectories::with_prefix("xr_environments").get_data_home()
+	BaseDirectories::with_prefix("xr_environments").get_data_home()
 }
 
 pub fn valid_environments() -> HashMap<String, DirEntry> {
