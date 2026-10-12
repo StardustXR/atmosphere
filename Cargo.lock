@@ -234,6 +234,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "atmosphere"
+version = "0.53.0-rc.1"
+dependencies = [
+ "ansi_term",
+ "clap",
+ "confy",
+ "copy_dir",
+ "glam",
+ "kdl",
+ "serde",
+ "stardust-xr-asteroids",
+ "stardust-xr-fusion",
+ "tokio",
+ "uuid",
+ "xdg",
+]
+
+[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1480,24 +1498,6 @@ dependencies = [
  "tokio",
  "tracing",
  "zbus",
-]
-
-[[package]]
-name = "stardust-xr-atmosphere"
-version = "0.53.0-rc.1"
-dependencies = [
- "ansi_term",
- "clap",
- "confy",
- "copy_dir",
- "glam",
- "kdl",
- "serde",
- "stardust-xr-asteroids",
- "stardust-xr-fusion",
- "tokio",
- "uuid",
- "xdg",
 ]
 
 [[package]]

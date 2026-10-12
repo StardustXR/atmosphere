@@ -1,15 +1,11 @@
 [package]
-name = "stardust-xr-atmosphere"
+name = "atmosphere"
 version = "0.53.0-rc.1"
 edition = "2024"
 description = "Stardust XR's reference environment/homespace client"
 authors = ["Nova King <technobaboo@proton.me>"]
 license = "MIT"
 repository = "https://github.com/StardustXR/atmosphere"
-
-[[bin]]
-name = "atmosphere"
-path = "src/main.rs"
 
 [dependencies]
 tokio = { version = "1.38.0", features = ["full"] }
